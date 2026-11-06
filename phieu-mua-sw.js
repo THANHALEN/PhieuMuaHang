@@ -1,5 +1,5 @@
 // Đổi VERSION ở mỗi lần release -> cache + SW đổi -> client tự cập nhật
-const VERSION='20261107.0101';
+const VERSION='20261107.0136';
 const CACHE='phieu-mua-'+VERSION;
 const BASE='/PhieuMuaHang/';
 const SHELL=[BASE,BASE+'index.html',BASE+'phieu-mua.webmanifest',BASE+'icons/icon-192.png',BASE+'icons/icon-512.png'];
