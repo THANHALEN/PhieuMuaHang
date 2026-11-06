@@ -1,17 +1,17 @@
 // Đổi VERSION ở mỗi lần release -> cache + SW đổi -> client tự cập nhật
-const VERSION='20261107.0136';
+const VERSION='20261107.0144';
 const CACHE='phieu-mua-'+VERSION;
 const BASE='/PhieuMuaHang/';
 const SHELL=[BASE,BASE+'index.html',BASE+'phieu-mua.webmanifest',BASE+'icons/icon-192.png',BASE+'icons/icon-512.png'];
 
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})));
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{})); // lỗi cache không được làm hỏng việc cài SW
   self.skipWaiting();
 });
 
 self.addEventListener('activate',e=>{
   e.waitUntil(
-    caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+    caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).catch(()=>{})
       .then(()=>self.clients.claim())
   );
 });
@@ -31,14 +31,14 @@ self.addEventListener('fetch',e=>{
         const copy=res.clone();
         caches.open(CACHE).then(c=>c.put(BASE,copy)).catch(()=>{});
         return res;
-      }).catch(()=>caches.match(BASE).then(r=>r||caches.match(BASE+'index.html')))
+      }).catch(()=>caches.match(BASE).then(r=>r||caches.match(BASE+'index.html')).catch(()=>undefined))
     );
     return;
   }
 
   // Tài nguyên khác: stale-while-revalidate
   e.respondWith(
-    caches.match(req).then(cached=>{
+    caches.match(req).catch(()=>undefined).then(cached=>{
       const net=fetch(req).then(res=>{
         if(res.ok) caches.open(CACHE).then(c=>c.put(req,res.clone())).catch(()=>{});
         return res;
