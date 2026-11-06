@@ -1,0 +1,9 @@
+{
+  "name": "Phiếu Mua Hàng",
+  "short_name": "Phiếu Mua",
+  "start_url": "/PhieuMuaHang/",
+  "scope": "/PhieuMuaHang/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
