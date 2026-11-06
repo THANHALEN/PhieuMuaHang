@@ -1,29 +1,46 @@
-﻿const CACHE='phieu-mua-v1';
-const ASSETS=[
-  '/PhieuMuaHang/',
-  '/PhieuMuaHang/index.html',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap'
-];
+// VERSION được CI thay bằng mã commit mỗi lần deploy -> cache + SW đổi -> client tự cập nhật
+const VERSION='__VERSION__';
+const CACHE='phieu-mua-'+VERSION;
+const BASE='/PhieuMuaHang/';
+const SHELL=[BASE,BASE+'index.html',BASE+'phieu-mua.webmanifest',BASE+'icons/icon-192.png',BASE+'icons/icon-512.png'];
 
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})));
   self.skipWaiting();
 });
 
 self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+  );
 });
 
+self.addEventListener('message',e=>{ if(e.data==='SKIP_WAITING') self.skipWaiting(); });
+
 self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET') return;
-  const url=new URL(e.request.url);
-  // Supabase calls: network only
-  if(url.hostname.includes('supabase.co')) return;
+  const req=e.request;
+  if(req.method!=='GET') return;
+  const url=new URL(req.url);
+  if(url.hostname.includes('supabase.co')) return; // API: network only
+
+  // Trang HTML: ưu tiên mạng (luôn lấy bản mới), offline thì dùng cache
+  if(req.mode==='navigate'){
+    e.respondWith(
+      fetch(req,{cache:'no-cache'}).then(res=>{
+        const copy=res.clone();
+        caches.open(CACHE).then(c=>c.put(BASE,copy)).catch(()=>{});
+        return res;
+      }).catch(()=>caches.match(BASE).then(r=>r||caches.match(BASE+'index.html')))
+    );
+    return;
+  }
+
+  // Tài nguyên khác: stale-while-revalidate
   e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const net=fetch(e.request).then(res=>{
-        if(res.ok) caches.open(CACHE).then(c=>c.put(e.request,res.clone())).catch(()=>{});
+    caches.match(req).then(cached=>{
+      const net=fetch(req).then(res=>{
+        if(res.ok) caches.open(CACHE).then(c=>c.put(req,res.clone())).catch(()=>{});
         return res;
       }).catch(()=>cached);
       return cached||net;

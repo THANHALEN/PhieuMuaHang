@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -6,9 +6,12 @@
 <title>Phiếu Mua Hàng</title>
 <meta name="theme-color" content="#e8ecf1">
 <meta name="mobile-web-app-capable" content="true">
-<meta name="apple-mobile-web-app-capable" content="true">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Phiếu Mua">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="phieu-mua.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
@@ -864,7 +867,18 @@ window.addEventListener('offline',updateOnline);
 
   // SW
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/PhieuMuaHang/phieu-mua-sw.js',{scope:'/PhieuMuaHang/'}).catch(()=>{});
+    const hadSW=!!navigator.serviceWorker.controller;
+    let reloaded=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(!hadSW||reloaded) return; // lần cài đầu không cần reload
+      reloaded=true; location.reload(); // có bản mới -> tải lại để áp dụng
+    });
+    navigator.serviceWorker.register('/PhieuMuaHang/phieu-mua-sw.js',{scope:'/PhieuMuaHang/',updateViaCache:'none'})
+      .then(reg=>{
+        const check=()=>reg.update().catch(()=>{});
+        document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
+        setInterval(check,30*60*1000);
+      }).catch(()=>{});
   }
 })();
 </script>
