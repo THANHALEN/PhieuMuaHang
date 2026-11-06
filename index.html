@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phiếu Mua Hàng</title>
 <meta name="theme-color" content="#e8ecf1">
-<meta name="mobile-web-app-capable" content="true">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Phiếu Mua">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -329,7 +329,7 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
 <!-- HEADER -->
 <div class="sbar"></div>
 <div class="hdr">
-  <div id="status-pill" class="pill offline">● OFFLINE</div>
+  <div id="status-pill" class="pill offline" title="Đang kiểm tra kết nối database...">● v…</div>
   <div class="hdr-mid">
     <span class="co">Vina InterStarch</span>
     <h1>Phiếu Mua Hàng</h1>
@@ -589,6 +589,7 @@ function saveSettings(){
   localStorage.setItem('sb_key',SB_KEY);
   closeSettings();
   showToast('Đã lưu cài đặt');
+  checkDb();
 }
 function openSettings(){
   document.getElementById('nv-name').value=NV_NAME;
@@ -837,34 +838,55 @@ async function downloadPrint(){
 /* ══════════════════════════════
    ONLINE / OFFLINE
 ══════════════════════════════ */
+let APP_VER='';
+async function loadVersion(){
+  try{
+    const t=await (await fetch('/PhieuMuaHang/phieu-mua-sw.js',{cache:'no-store'})).text();
+    const m=t.match(/const VERSION='([^']+)'/);
+    if(m) APP_VER=m[1];
+  }catch{}
+  paintPill(dbOk);
+}
+
+let dbOk=false, dbChecking=false;
+function paintPill(ok){
+  const pill=document.getElementById('status-pill');
+  pill.textContent='● v'+(APP_VER||'…');
+  pill.className='pill '+(ok?'online':'offline');
+  pill.title=ok?'Đã kết nối database':(SB_URL&&SB_KEY?'Không kết nối được database':'Chưa cài đặt database');
+}
+// Xanh = gọi được Supabase; Đỏ = chưa cấu hình / mất mạng / lỗi
+async function checkDb(){
+  if(dbChecking) return;
+  dbChecking=true;
+  let ok=false;
+  if(navigator.onLine && SB_URL && SB_KEY){
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),6000);
+    try{
+      const res=await fetch(`${SB_URL}/rest/v1/phieu_mua_hang?select=phieu_no&limit=1`,{
+        headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},cache:'no-store',signal:ctl.signal
+      });
+      ok=res.ok;
+    }catch{ok=false;}
+    clearTimeout(to);
+  }
+  const was=dbOk; dbOk=ok; dbChecking=false;
+  paintPill(ok);
+  if(ok&&!was) syncPending();
+}
 function updateOnline(){
   isOnline=navigator.onLine;
-  const pill=document.getElementById('status-pill');
-  if(isOnline){
-    pill.textContent='● ONLINE';
-    pill.className='pill online';
-    syncPending();
-  } else {
-    pill.textContent='● OFFLINE';
-    pill.className='pill offline';
-  }
+  checkDb();
 }
 window.addEventListener('online',updateOnline);
 window.addEventListener('offline',updateOnline);
+setInterval(checkDb,30000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkDb(); });
 
 /* ══════════════════════════════
    INIT
 ══════════════════════════════ */
 (async()=>{
-  db=await openDB();
-  loadSettings();
-  updateOnline();
-  await initPhieu();
-  renderItems();
-
-  // Nếu chưa có settings → mở settings
-  if(!SB_URL||!SB_KEY) openSettings();
-
   // SW
   if('serviceWorker' in navigator){
     const hadSW=!!navigator.serviceWorker.controller;
@@ -880,6 +902,16 @@ window.addEventListener('offline',updateOnline);
         setInterval(check,30*60*1000);
       }).catch(()=>{});
   }
+  db=await openDB();
+  loadSettings();
+  loadVersion();
+  updateOnline();
+  await initPhieu();
+  renderItems();
+
+  // Nếu chưa có settings → mở settings
+  if(!SB_URL||!SB_KEY) openSettings();
+
 })();
 </script>
 </body>
