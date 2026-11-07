@@ -448,6 +448,7 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
       <input class="s-in" id="sb-key" placeholder="eyJhbG..." autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div style="margin-top:4px;">
+      <button class="s-btn" style="width:100%;margin-bottom:8px;" onclick="copySetupLink()">Sao chép link cài nhanh</button>
       <button class="s-btn ok" style="width:100%;" onclick="saveSettings()">Lưu cài đặt</button>
     </div>
   </div>
@@ -575,10 +576,40 @@ async function nextPhieuNo(){
 /* ══════════════════════════════
    SETTINGS
 ══════════════════════════════ */
+/* Link cài nhanh: #cfg=<base64 JSON {url,key}>. Mở link -> lưu URL + key -> xoá hash khỏi thanh địa chỉ */
+const b64enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+const b64dec=s=>JSON.parse(decodeURIComponent(escape(atob(s))));
+function applySetupLink(){
+  const m=/^#cfg=(.+)$/.exec(location.hash);
+  if(!m) return false;
+  try{
+    const c=b64dec(decodeURIComponent(m[1]));
+    const url=String(c.url||'').trim().replace(/\/+$/,'');
+    const key=String(c.key||'').trim();
+    if(!/^https:\/\/.+/.test(url)||!key) throw new Error('thiếu url/key');
+    localStorage.setItem('sb_url',url);
+    localStorage.setItem('sb_key',key);
+    history.replaceState(null,'',location.pathname+location.search);
+    return true;
+  }catch(e){
+    console.error('Link cài nhanh không hợp lệ',e);
+    return false;
+  }
+}
+async function copySetupLink(){
+  const url=document.getElementById('sb-url').value.trim().replace(/\/+$/,'');
+  const key=document.getElementById('sb-key').value.trim();
+  if(!url||!key){showToast('Nhập URL và Anon key trước','error');return;}
+  const link=location.origin+location.pathname+'#cfg='+encodeURIComponent(b64enc({url,key}));
+  try{await navigator.clipboard.writeText(link);showToast('Đã sao chép link cài nhanh');}
+  catch(e){prompt('Sao chép link:',link);}
+}
 function loadSettings(){
+  const linked=applySetupLink();
   NV_NAME=localStorage.getItem('nv_name')||'';
   SB_URL=localStorage.getItem('sb_url')||'';
   SB_KEY=localStorage.getItem('sb_key')||'';
+  if(linked) setTimeout(()=>showToast('Đã nhận cấu hình database từ link'),300);
 }
 function saveSettings(){
   NV_NAME=document.getElementById('nv-name').value.trim();
