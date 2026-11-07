@@ -839,13 +839,38 @@ async function downloadPrint(){
    ONLINE / OFFLINE
 ══════════════════════════════ */
 let APP_VER='';
-async function loadVersion(){
+async function hostVersion(){
   try{
     const t=await (await fetch('/PhieuMuaHang/phieu-mua-sw.js',{cache:'no-store'})).text();
     const m=t.match(/const VERSION='([^']+)'/);
-    if(m) APP_VER=m[1];
-  }catch{}
+    return m?m[1]:'';
+  }catch{return '';}
+}
+function swVersion(){
+  return new Promise(res=>{
+    const c=navigator.serviceWorker&&navigator.serviceWorker.controller;
+    if(!c) return res('');
+    const ch=new MessageChannel();
+    ch.port1.onmessage=e=>res(e.data||'');
+    c.postMessage('GET_VERSION',[ch.port2]);
+    setTimeout(()=>res(''),1500);
+  });
+}
+async function loadVersion(){
+  APP_VER=(await swVersion())||(await hostVersion());
   paintPill(dbOk);
+}
+// So version đang chạy với version trên host; lệch -> tải SW mới, SW tự kích hoạt và trang tự reload
+let swReg=null;
+async function checkUpdate(){
+  if(!swReg||!navigator.onLine) return;
+  const host=await hostVersion(); if(!host) return;
+  const run=await swVersion();
+  const hasCtl=!!navigator.serviceWorker.controller;
+  if(hasCtl&&run!==host){
+    try{await swReg.update();}catch{}
+    if(swReg.waiting) swReg.waiting.postMessage('SKIP_WAITING');
+  }
 }
 
 let dbOk=false, dbChecking=false;
@@ -897,10 +922,12 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkDb(
     });
     navigator.serviceWorker.register('/PhieuMuaHang/phieu-mua-sw.js',{scope:'/PhieuMuaHang/',updateViaCache:'none'})
       .then(reg=>{
-        const check=()=>reg.update().catch(()=>{});
-        document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); });
-        setInterval(check,30*60*1000);
-      }).catch(()=>{});
+        swReg=reg;
+        checkUpdate();
+        document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkUpdate(); });
+        window.addEventListener('online',checkUpdate);
+        setInterval(checkUpdate,10*60*1000);
+      }).catch(e=>console.error('SW register failed',e));
   }
   db=await openDB();
   loadSettings();

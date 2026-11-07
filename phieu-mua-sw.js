@@ -1,5 +1,5 @@
 // Đổi VERSION ở mỗi lần release -> cache + SW đổi -> client tự cập nhật
-const VERSION='20261107.0920';
+const VERSION='20261107.0934';
 const CACHE='phieu-mua-'+VERSION;
 const BASE='/PhieuMuaHang/';
 const SHELL=[BASE,BASE+'index.html',BASE+'phieu-mua.webmanifest',BASE+'icons/icon-192.png',BASE+'icons/icon-512.png'];
@@ -16,13 +16,17 @@ self.addEventListener('activate',e=>{
   );
 });
 
-self.addEventListener('message',e=>{ if(e.data==='SKIP_WAITING') self.skipWaiting(); });
+self.addEventListener('message',e=>{
+  if(e.data==='SKIP_WAITING') self.skipWaiting();
+  if(e.data==='GET_VERSION'&&e.ports&&e.ports[0]) e.ports[0].postMessage(VERSION);
+});
 
 self.addEventListener('fetch',e=>{
   const req=e.request;
   if(req.method!=='GET') return;
   const url=new URL(req.url);
   if(url.hostname.includes('supabase.co')) return; // API: network only
+  if(req.cache==='no-store'||url.pathname.endsWith('-sw.js')) return; // kiểm tra version: luôn đi thẳng ra host
 
   // Trang HTML: ưu tiên mạng (luôn lấy bản mới), offline thì dùng cache
   if(req.mode==='navigate'){
