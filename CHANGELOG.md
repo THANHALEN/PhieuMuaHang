@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.4 - 2026-11-07
+- Dòng hàng hóa xếp nối tiếp từ đỉnh box (không còn giãn đều/căn giữa); nhiều dòng thì cuộn trong box, thêm hàng xong tự cuộn tới dòng mới.
+
 ## 1.3 - 2026-11-07
 - Màn xem trước phiếu in: nút Tải PDF / In ngay chuyển xuống thanh hành động ở đáy, cùng kiểu và vị trí với màn chính.
 

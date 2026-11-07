@@ -148,7 +148,7 @@ body{
   background:var(--bg);border-radius:var(--r);box-shadow:var(--up);
   overflow:hidden;display:flex;flex-direction:column;
 }
-.items-list{flex:1;min-height:0;display:flex;flex-direction:column;}
+.items-list{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;overflow-y:auto;}
 
 /* EMPTY STATE */
 .empty-state{
@@ -160,9 +160,9 @@ body{
 
 /* ITEM ROW */
 .item-row{
-  flex:1;min-height:0;
-  display:flex;flex-direction:column;justify-content:center;
-  padding:0 10px;
+  flex:0 0 auto; /* cao theo nội dung, xếp nối tiếp từ đỉnh box */
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:8px 10px;
   border-bottom:1px solid var(--sh-d);
   gap:3px;
   transition:background .15s;
@@ -677,6 +677,8 @@ function confirmAdd(){
   items.push({hang,seller,sl:parseVN(sl)||0,tc:parseVN(tc)||0,gia:parseVN(gia)||0});
   closeAdd();
   renderItems();
+  const list=document.getElementById('items-list');
+  list.scrollTop=list.scrollHeight; // dòng vừa thêm hiện ra ở cuối
 }
 
 /* ══════════════════════════════
