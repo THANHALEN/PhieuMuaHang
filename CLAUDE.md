@@ -8,7 +8,7 @@ Vanilla HTML/CSS/JS, một file `phieu-mua.html` (`index.html` là bản sao b�
 
 ## Workflow & Rules
 - Chỉnh sửa có mục tiêu (atomic): chỉ patch đúng dòng cần sửa.
-- Mỗi release đổi `VERSION` trong `phieu-mua-sw.js` (định dạng `yyyyMMdd.HHmm`). Số này hiện trên pill trạng thái.
+- Version dạng `MAJOR.MINOR` (vd `1.0`, `1.1`, `2.0`), một nguồn duy nhất: hằng `VERSION` trong `phieu-mua-sw.js`. Mỗi release phải tăng: sửa/tính năng nhỏ → MINOR (`1.0`→`1.1`); thay đổi lớn/phá cấu trúc dữ liệu → MAJOR (`2.0`). Số này hiện trên pill trạng thái dạng `● v1.1`.
 - Pill trạng thái: hiện `● v<version>`; xanh = gọi được Supabase, đỏ = chưa cấu hình / mất mạng / lỗi.
 - Mọi thay đổi mã nguồn phải kiểm tra cú pháp (`node --check`) trước khi bàn giao.
 
