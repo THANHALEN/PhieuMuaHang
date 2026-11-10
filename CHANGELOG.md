@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.12 - 2026-11-10
+- Preview A5: in đậm toàn bộ giá trị các cột SL, % Tạp, Giá, Thành tiền.
+
 ## 1.11 - 2026-11-10
 - Preview A5: khung viền 1px sát mép, tỉ lệ cột 4/38/13/12/10/23, bảng màu mới (đỏ #991b1b, xanh #0284c7), tiêu đề cột "Thông tin hàng hóa" một dòng, dòng Tổng canh theo cột; chữ trong bảng cùng 11px, nội dung dài tự xuống dòng.
 
