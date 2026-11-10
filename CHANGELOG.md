@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.9 - 2026-11-10
+- Preview A5: ngày giờ căn phải, bỏ NV thu mua ở dòng thông tin, tiêu đề cột "Thông tin hàng hóa", dòng Tổng canh theo cột; tên hàng/phân loại/người bán cùng cỡ 11px với số liệu.
+
 ## 1.8 - 2026-11-10
 - Preview A5 đổi kiểu theo mẫu mới (tiêu đề đỏ sẫm, cột hàng hóa 3 dòng, tổng 2 vế); thêm ô Phân loại (không bắt buộc) cho dòng hàng, lưu trong items, hiện ở danh sách và bản in.
 

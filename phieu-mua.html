@@ -305,7 +305,7 @@ body{
 .pv-header{border-bottom:3px solid #7F1419;padding-bottom:8px;margin-bottom:10px;}
 .pv-company{font-size:15px;font-weight:800;color:#7F1419;letter-spacing:.6px;text-transform:uppercase;}
 .pv-title{font-size:26px;font-weight:800;margin:0 0 4px;line-height:1.1;}
-.pv-meta{display:flex;gap:22px;font-size:12px;color:#1a1f28;font-weight:500;}
+.pv-meta{display:flex;justify-content:space-between;font-size:12px;color:#1a1f28;font-weight:500;}
 .pv-info{display:flex;flex-wrap:wrap;gap:2px 18px;margin-bottom:10px;font-size:11px;color:#5a6270;}
 .pv-info b{color:#1a1f28;font-weight:700;}
 table.pv-tbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;margin-bottom:10px;font-variant-numeric:tabular-nums;font-family:'Inter',sans-serif;}
@@ -314,11 +314,13 @@ table.pv-tbl th small{display:block;font-weight:600;font-size:8.5px;line-height:
 table.pv-tbl td{padding:6px 3px;border-bottom:1px solid #dcdcd8;vertical-align:middle;}
 table.pv-tbl td.r{text-align:right;font-size:11px;white-space:nowrap;}
 table.pv-tbl td.i{text-align:center;font-size:14px;}
-.pv-n{font-size:14px;font-weight:800;line-height:1.15;}
-.pv-c{font-size:13px;font-weight:800;color:#0B5578;line-height:1.15;}
-.pv-s{font-size:10.5px;color:#7F1419;line-height:1.2;}
-.pv-total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px solid #7F1419;padding:10px 4px 0;margin-top:4px;font-size:16px;font-weight:800;}
-.pv-total b{color:#7F1419;}
+.pv-n{font-size:11px;font-weight:800;line-height:1.15;}
+.pv-c{font-size:11px;font-weight:800;color:#0B5578;line-height:1.15;}
+.pv-s{font-size:11px;color:#7F1419;line-height:1.2;}
+table.pv-tbl tfoot tr.sp td{border:none;padding:0;height:12px;}
+table.pv-tbl tfoot td{border-top:3px solid #7F1419;border-bottom:none;padding:10px 3px 0;font-size:11px;font-weight:800;}
+table.pv-tbl tfoot td.tl{text-align:left;color:#1a1f28;}
+table.pv-tbl tfoot td.tt{color:#7F1419;}
 .pv-sign{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;text-align:center;font-size:11px;color:#1a1f28;}
 .pv-sign .sk{font-weight:800;font-size:13px;margin-bottom:56px;}/* Thanh hành động của màn xem trước: dùng lại .actions/.act của màn chính, chỉ đổi số cột */
 .actions.pv-actions{grid-template-columns:1fr 1fr;}
@@ -864,25 +866,21 @@ function showPrint(){
     </div>
     <div class="pv-info">
       <span>Biển số xe: <b>${esc(bienSo)}</b></span>
-      <span>NV thu mua: <b>${esc(NV_NAME||'---')}</b></span>
       ${ghiChu?`<span>Ghi chú: <b>${esc(ghiChu)}</b></span>`:''}
     </div>
     <table class="pv-tbl">
       <colgroup><col style="width:7%"><col><col style="width:15%"><col style="width:12%"><col style="width:12%"><col style="width:22%"></colgroup>
       <thead><tr>
         <th style="text-align:center">#</th>
-        <th>Tên hàng hóa<small>Phân loại hàng hóa<br>Họ tên người bán</small></th>
+        <th>Thông tin hàng hóa</th>
         <th style="text-align:right">SL (kg)</th>
         <th style="text-align:right">% Tạp</th>
         <th style="text-align:right">Giá</th>
         <th style="text-align:right">Thành tiền</th>
       </tr></thead>
       <tbody>${rows}</tbody>
+      <tfoot><tr class="sp"><td colspan="6"></td></tr><tr><td></td><td class="tl">Tổng:</td><td class="r tt">${toVN(tongSL)}</td><td class="r tt" colspan="3">${toVN(Math.round(tongTien))} đ</td></tr></tfoot>
     </table>
-    <div class="pv-total">
-      <span>Tổng: <b>${toVN(tongSL)}</b></span>
-      <b>${toVN(Math.round(tongTien))} đ</b>
-    </div>
     <div class="pv-sign">
       <div><div class="sk">Người bán</div>(Ký, ghi họ tên)</div>
       <div><div class="sk">NV Thu mua</div>(Ký, ghi họ tên)</div>
