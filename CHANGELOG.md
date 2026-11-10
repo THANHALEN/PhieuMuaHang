@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.8 - 2026-11-10
+- Preview A5 đổi kiểu theo mẫu mới (tiêu đề đỏ sẫm, cột hàng hóa 3 dòng, tổng 2 vế); thêm ô Phân loại (không bắt buộc) cho dòng hàng, lưu trong items, hiện ở danh sách và bản in.
+
 ## 1.7 - 2026-11-10
 - Nút thêm hàng hóa chỉ còn dấu + (có aria-label); thêm nút Test cạnh dấu + để thêm 3 dòng hàng mẫu vào phiếu đang nhập.
 

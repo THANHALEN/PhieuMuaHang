@@ -180,6 +180,7 @@ body{
 }
 .item-name-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
 .item-name{font-size:var(--fs-lg);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-cat{color:var(--accent);font-weight:700;}
 .seller{font-size:var(--fs-sm);font-weight:600;color:var(--muted);}
 .x-btn{
   width:20px;height:20px;border:none;border-radius:50%;
@@ -293,7 +294,7 @@ body{
 .pv-hdr-sp{width:34px;height:34px;}
 .pv-body{
   flex:1;min-height:0;overflow-y:auto;
-  padding:20px;
+  padding:12px;
 }
 .pv-page{
   max-width:420px;margin:0 auto 20px;
@@ -301,21 +302,25 @@ body{
   box-shadow:0 4px 24px rgba(0,0,0,.15);
   padding:20px;font-family:'Inter',sans-serif;color:#1a1f28;
 }
-.pv-header{border-bottom:2px solid #c0392b;padding-bottom:10px;margin-bottom:12px;}
-.pv-company{font-size:11px;font-weight:700;color:#c0392b;letter-spacing:.5px;text-transform:uppercase;}
-.pv-title{font-size:18px;font-weight:800;margin:2px 0;}
-.pv-meta{display:flex;gap:16px;font-size:10px;color:#5a6270;font-weight:600;}
-.pv-info{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-bottom:12px;font-size:11px;}
-.pv-info .k{color:#5a6270;font-weight:600;}
-.pv-info .v{font-weight:700;}
-table.pv-tbl{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:12px;}
-table.pv-tbl th{background:#f5f5f5;padding:5px 6px;text-align:left;font-weight:700;font-size:9px;text-transform:uppercase;color:#5a6270;border-bottom:1px solid #ddd;}
-table.pv-tbl td{padding:5px 6px;border-bottom:1px solid #eee;vertical-align:middle;}
-table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;}
-.pv-total{text-align:right;font-size:13px;font-weight:800;border-top:2px solid #c0392b;padding-top:8px;margin-top:4px;}
-.pv-sign{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;text-align:center;font-size:10px;color:#5a6270;}
-.pv-sign .sk{font-weight:700;margin-bottom:40px;}
-/* Thanh hành động của màn xem trước: dùng lại .actions/.act của màn chính, chỉ đổi số cột */
+.pv-header{border-bottom:3px solid #7F1419;padding-bottom:8px;margin-bottom:10px;}
+.pv-company{font-size:15px;font-weight:800;color:#7F1419;letter-spacing:.6px;text-transform:uppercase;}
+.pv-title{font-size:26px;font-weight:800;margin:0 0 4px;line-height:1.1;}
+.pv-meta{display:flex;gap:22px;font-size:12px;color:#1a1f28;font-weight:500;}
+.pv-info{display:flex;flex-wrap:wrap;gap:2px 18px;margin-bottom:10px;font-size:11px;color:#5a6270;}
+.pv-info b{color:#1a1f28;font-weight:700;}
+table.pv-tbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;margin-bottom:10px;font-variant-numeric:tabular-nums;font-family:'Inter',sans-serif;}
+table.pv-tbl th{background:#E5E6E3;padding:7px 3px;text-align:left;font-weight:800;font-size:9.5px;text-transform:uppercase;color:#1a1f28;border-bottom:1px solid #cfcfcb;vertical-align:middle;white-space:nowrap;}
+table.pv-tbl th small{display:block;font-weight:600;font-size:8.5px;line-height:1.25;}
+table.pv-tbl td{padding:6px 3px;border-bottom:1px solid #dcdcd8;vertical-align:middle;}
+table.pv-tbl td.r{text-align:right;font-size:11px;white-space:nowrap;}
+table.pv-tbl td.i{text-align:center;font-size:14px;}
+.pv-n{font-size:14px;font-weight:800;line-height:1.15;}
+.pv-c{font-size:13px;font-weight:800;color:#0B5578;line-height:1.15;}
+.pv-s{font-size:10.5px;color:#7F1419;line-height:1.2;}
+.pv-total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px solid #7F1419;padding:10px 4px 0;margin-top:4px;font-size:16px;font-weight:800;}
+.pv-total b{color:#7F1419;}
+.pv-sign{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;text-align:center;font-size:11px;color:#1a1f28;}
+.pv-sign .sk{font-weight:800;font-size:13px;margin-bottom:56px;}/* Thanh hành động của màn xem trước: dùng lại .actions/.act của màn chính, chỉ đổi số cột */
 .actions.pv-actions{grid-template-columns:1fr 1fr;}
 </style>
 </head>
@@ -406,6 +411,10 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
       <div class="lbl-in full">
         <label>Loại hàng hóa</label>
         <input class="s-in" id="f-hang" placeholder="Bã khoai lang..." autocomplete="off">
+      </div>
+      <div class="lbl-in full">
+        <label>Phân loại (không bắt buộc)</label>
+        <input class="s-in" id="f-phanloai" placeholder="vụn, mật, già..." autocomplete="off">
       </div>
       <div class="lbl-in full">
         <label>Tên người bán (NCC)</label>
@@ -651,6 +660,7 @@ function closeSettings(e){
 ══════════════════════════════ */
 function openAddItem(){
   document.getElementById('f-hang').value='';
+  document.getElementById('f-phanloai').value='';
   document.getElementById('f-seller').value='';
   document.getElementById('f-sl').value='';
   document.getElementById('f-tc').value='';
@@ -664,13 +674,14 @@ function closeAdd(e){
 }
 function confirmAdd(){
   const hang=document.getElementById('f-hang').value.trim();
+  const phanloai=document.getElementById('f-phanloai').value.trim();
   const seller=document.getElementById('f-seller').value.trim();
   const sl=document.getElementById('f-sl').value.trim();
   const tc=document.getElementById('f-tc').value.trim();
   const gia=document.getElementById('f-gia').value.trim();
   if(!hang){showToast('Nhập tên hàng hóa','error');return;}
   if(!seller){showToast('Nhập tên người bán','error');return;}
-  items.push({hang,seller,sl:parseVN(sl)||0,tc:parseVN(tc)||0,gia:parseVN(gia)||0});
+  items.push({hang,phanloai,seller,sl:parseVN(sl)||0,tc:parseVN(tc)||0,gia:parseVN(gia)||0});
   closeAdd();
   renderItems();
   const list=document.getElementById('items-list');
@@ -696,7 +707,7 @@ function renderItems(){
       <div class="row1">
         <span class="tag">${String(i+1).padStart(2,'0')}</span>
         <div class="item-name-wrap">
-          <span class="item-name">${esc(it.hang)}</span>
+          <span class="item-name">${esc(it.hang)}${it.phanloai?` <span class="item-cat">${esc(it.phanloai)}</span>`:''}</span>
           <span class="seller">${esc(it.seller)}</span>
         </div>
         <button class="x-btn" onclick="removeItem(${i})">×</button>
@@ -714,9 +725,9 @@ function removeItem(i){items.splice(i,1);renderItems();}
 /* Nút Test: thêm dòng hàng mẫu (dữ liệu giả) vào phiếu đang nhập; chỉ nằm trong bộ nhớ tới khi bấm Lưu tạm/Chốt. */
 function addSampleItems(){
   items.push(
-    {hang:'Bã khoai lang',seller:'Nguyễn Văn A',sl:12500,tc:2.5,gia:1850},
-    {hang:'Vỏ sắn tươi',seller:'Trần Thị B',sl:8300,tc:1.2,gia:2100},
-    {hang:'Sắn lát khô',seller:'Phạm Văn D',sl:15200,tc:0.8,gia:4300}
+    {hang:'Bã khoai lang',phanloai:'vụn',seller:'Nguyễn Văn A',sl:12500,tc:2.5,gia:1850},
+    {hang:'Vỏ sắn tươi',phanloai:'màu trắng',seller:'Trần Thị B',sl:8300,tc:1.2,gia:2100},
+    {hang:'Sắn lát khô',phanloai:'già',seller:'Phạm Văn D',sl:15200,tc:0.8,gia:4300}
   );
   renderItems();
   const list=document.getElementById('items-list');
@@ -834,9 +845,8 @@ function showPrint(){
 
   let rows=items.map((it,i)=>`
     <tr>
-      <td>${i+1}</td>
-      <td>${esc(it.hang)}</td>
-      <td>${esc(it.seller)}</td>
+      <td class="i">${i+1}</td>
+      <td><div class="pv-n">${esc(it.hang)}</div>${it.phanloai?`<div class="pv-c">${esc(it.phanloai)}</div>`:''}<div class="pv-s">${esc(it.seller)}</div></td>
       <td class="r">${toVN(it.sl)}</td>
       <td class="r">${toVN(it.tc,1)}%</td>
       <td class="r">${toVN(it.gia)}</td>
@@ -853,29 +863,30 @@ function showPrint(){
       </div>
     </div>
     <div class="pv-info">
-      <span class="k">Biển số xe</span><span class="v">${esc(bienSo)}</span>
-      <span class="k">NV thu mua</span><span class="v">${esc(NV_NAME||'---')}</span>
-      ${ghiChu?`<span class="k">Ghi chú</span><span class="v">${esc(ghiChu)}</span>`:''}
+      <span>Biển số xe: <b>${esc(bienSo)}</b></span>
+      <span>NV thu mua: <b>${esc(NV_NAME||'---')}</b></span>
+      ${ghiChu?`<span>Ghi chú: <b>${esc(ghiChu)}</b></span>`:''}
     </div>
     <table class="pv-tbl">
+      <colgroup><col style="width:7%"><col><col style="width:15%"><col style="width:12%"><col style="width:12%"><col style="width:22%"></colgroup>
       <thead><tr>
-        <th>#</th><th>Hàng hóa</th><th>Người bán</th>
+        <th style="text-align:center">#</th>
+        <th>Tên hàng hóa<small>Phân loại hàng hóa<br>Họ tên người bán</small></th>
         <th style="text-align:right">SL (kg)</th>
-        <th style="text-align:right">Tạp</th>
+        <th style="text-align:right">% Tạp</th>
         <th style="text-align:right">Giá</th>
         <th style="text-align:right">Thành tiền</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div class="pv-total">
-      Tổng SL: <strong>${toVN(tongSL)} kg</strong> &nbsp;|&nbsp;
-      Thành tiền: <strong>${toVN(Math.round(tongTien))} đ</strong>
+      <span>Tổng: <b>${toVN(tongSL)}</b></span>
+      <b>${toVN(Math.round(tongTien))} đ</b>
     </div>
     <div class="pv-sign">
       <div><div class="sk">Người bán</div>(Ký, ghi họ tên)</div>
       <div><div class="sk">NV Thu mua</div>(Ký, ghi họ tên)</div>
-    </div>`;
-  document.getElementById('print-view').classList.add('show');
+    </div>`;  document.getElementById('print-view').classList.add('show');
 }
 function hidePrint(){document.getElementById('print-view').classList.remove('show');}
 
