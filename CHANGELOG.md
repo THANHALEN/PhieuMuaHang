@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.14 - 2026-11-10
+- Preview A5: dòng Tổng bỏ chữ "đ", hai giá trị tổng (SL, Thành tiền) gióng phải đúng mép số liệu của cột tương ứng.
+
 ## 1.13 - 2026-11-10
 - Preview A5: in đậm toàn bộ bảng; tiêu đề cột canh giữa, nền xám đậm hơn, chữ đen đậm cho nổi bật.
 

@@ -323,8 +323,8 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
 .pv-tf{display:grid;grid-template-columns:4% 38% 13% 12% 10% 23%;border-top:2px solid #991b1b;padding:8px 0;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;color:#991b1b;}
 .pv-tf>span{padding:0 3px;white-space:nowrap;}
 .pv-tf .tl{grid-column:1/3;text-align:center;text-transform:uppercase;}
-.pv-tf .r{text-align:right;}
-.pv-tf .m{grid-column:4/7;}
+.pv-tf .r{text-align:right;padding-right:1px;}
+.pv-tf .m{grid-column:4/7;padding-right:2px;}
 .pv-sign{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px;text-align:center;font-size:11px;color:#1a1f28;}
 .pv-sign .sk{font-weight:800;font-size:11px;margin-bottom:56px;}.actions.pv-actions{grid-template-columns:1fr 1fr;}
 </style>
@@ -879,7 +879,7 @@ function showPrint(){
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="pv-tf"><span class="tl">Tổng:</span><span class="r">${toVN(tongSL)}</span><span class="r m">${toVN(Math.round(tongTien))} đ</span></div>
+    <div class="pv-tf"><span class="tl">Tổng:</span><span class="r">${toVN(tongSL)}</span><span class="r m">${toVN(Math.round(tongTien))}</span></div>
     <div class="pv-sign">
       <div><div class="sk">Người bán</div>(Ký, ghi họ tên)</div>
       <div><div class="sk">NV Thu mua</div>(Ký, ghi họ tên)</div>
