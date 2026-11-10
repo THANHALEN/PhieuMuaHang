@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.5 - 2026-11-10
+- Chuẩn hóa cỡ chữ về 5 cấp (12/14/16/18/20px) bằng biến CSS `--fs-*`, chữ to hơn dễ đọc trên điện thoại; bản in không đổi.
+
 ## 1.4 - 2026-11-07
 - Dòng hàng hóa xếp nối tiếp từ đỉnh box (không còn giãn đều/căn giữa); nhiều dòng thì cuộn trong box, thêm hàng xong tự cuộn tới dòng mới.
 

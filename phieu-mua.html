@@ -25,6 +25,7 @@
   --up-sm:3px 3px 7px var(--sh-d),-3px -3px 7px var(--sh-l);
   --in:inset 2px 2px 6px var(--sh-d),inset -2px -2px 6px var(--sh-l);
   --r:14px;
+  --fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px; /* thang cỡ chữ */
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){
   --bg:#1e2229;--fg:#e4e8ef;--muted:#7a8494;
@@ -61,10 +62,10 @@ body{
   background:var(--bg);
 }
 .hdr-mid{display:flex;flex-direction:column;align-items:center;gap:1px;}
-.hdr-mid .co{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;}
-.hdr-mid h1{font-size:clamp(14px,4vw,17px);font-weight:800;}
+.hdr-mid .co{font-size:var(--fs-xs);font-weight:700;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;}
+.hdr-mid h1{font-size:var(--fs-xl);font-weight:800;}
 .pill{
-  font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;
+  font-size:var(--fs-xs);font-weight:800;padding:3px 9px;border-radius:999px;
   background:var(--bg);box-shadow:var(--in);
 }
 .pill.online{color:var(--green);}
@@ -80,7 +81,7 @@ body{
 .toast{
   position:fixed;top:0;left:0;right:0;z-index:100;
   padding:10px 16px;
-  font-size:12px;font-weight:700;color:#fff;
+  font-size:var(--fs-sm);font-weight:700;color:#fff;
   display:flex;align-items:center;gap:8px;
   transform:translateY(-100%);
   transition:transform .3s ease;
@@ -100,9 +101,9 @@ body{
   background:var(--bg);
 }
 .phieu-strip .no{
-  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);
+  font-family:'JetBrains Mono',monospace;font-size:var(--fs-md);font-weight:700;color:var(--accent);
 }
-.phieu-strip .dt{font-size:10px;color:var(--muted);font-weight:600;}
+.phieu-strip .dt{font-size:var(--fs-sm);color:var(--muted);font-weight:600;}
 
 /* ZONE */
 .zone{
@@ -116,9 +117,9 @@ body{
   display:flex;align-items:center;justify-content:space-between;
   padding:5px 2px 3px;
 }
-.sec-lbl{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.sec-lbl{font-size:var(--fs-xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
 .sec-add{
-  font-size:11px;font-weight:700;color:var(--accent);
+  font-size:var(--fs-md);font-weight:700;color:var(--accent);
   display:flex;align-items:center;gap:3px;cursor:pointer;
   background:none;border:none;padding:2px 4px;border-radius:6px;
 }
@@ -132,12 +133,12 @@ body{
   padding-bottom:4px;
 }
 .field{display:flex;flex-direction:column;gap:3px;}
-.field label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.field label{font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
 .nm-in{
   width:100%;background:var(--bg);border:none;outline:none;
   box-shadow:var(--in);border-radius:10px;
   padding:7px 10px;
-  font:600 12px/1 'Inter',sans-serif;color:var(--fg);
+  font:600 var(--fs-md)/1 'Inter',sans-serif;color:var(--fg);
   -webkit-appearance:none;
 }
 .nm-in::placeholder{color:var(--muted);opacity:.5;font-weight:400;}
@@ -156,7 +157,7 @@ body{
   gap:8px;color:var(--muted);
 }
 .empty-state svg{width:36px;height:36px;fill:none;stroke:var(--sh-d);stroke-width:1.5;stroke-linecap:round;}
-.empty-state p{font-size:12px;font-weight:600;}
+.empty-state p{font-size:var(--fs-sm);font-weight:600;}
 
 /* ITEM ROW */
 .item-row{
@@ -173,15 +174,15 @@ body{
 .row1{display:flex;align-items:center;gap:5px;}
 .tag{
   background:var(--accent-soft);color:var(--accent);
-  font-size:9px;font-weight:800;
+  font-size:var(--fs-xs);font-weight:800;
   padding:2px 5px;border-radius:999px;flex-shrink:0;
 }
 .item-name-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
-.item-name{font-size:clamp(11px,3vw,12px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.seller{font-size:clamp(9px,2.4vw,10px);font-weight:600;color:var(--muted);}
+.item-name{font-size:var(--fs-lg);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.seller{font-size:var(--fs-sm);font-weight:600;color:var(--muted);}
 .x-btn{
   width:20px;height:20px;border:none;border-radius:50%;
-  background:transparent;font-size:16px;color:var(--muted);
+  background:transparent;font-size:var(--fs-lg);color:var(--muted);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;opacity:.5;padding:0;line-height:1;
 }
@@ -189,11 +190,11 @@ body{
 
 .row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
 .mf{display:flex;flex-direction:column;gap:2px;}
-.mf label{font-size:clamp(7px,1.9vw,8px);font-weight:700;color:var(--muted);letter-spacing:.2px;}
+.mf label{font-size:var(--fs-xs);font-weight:700;color:var(--muted);letter-spacing:.2px;}
 .mv{
   background:var(--bg);box-shadow:var(--in);
   border-radius:7px;padding:clamp(3px,.8vh,5px) 6px;
-  font:700 clamp(11px,3vw,12px)/1 'JetBrains Mono',monospace;
+  font:700 var(--fs-md)/1 'JetBrains Mono',monospace;
   color:var(--fg);border:none;outline:none;width:100%;
   -webkit-appearance:none;text-align:right;
 }
@@ -216,7 +217,7 @@ body{
 }
 .act:active{transform:scale(.96);box-shadow:var(--in);}
 .act svg{width:20px;height:20px;fill:none;stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-.act span{font-size:clamp(8px,2.2vw,9px);font-weight:800;color:var(--muted);letter-spacing:.3px;}
+.act span{font-size:var(--fs-xs);font-weight:800;color:var(--muted);letter-spacing:.3px;}
 .act.primary{background:var(--accent);box-shadow:0 4px 14px var(--accent-g);}
 .act.primary svg{stroke:#fff;}
 .act.primary span{color:rgba(255,255,255,.88);}
@@ -240,16 +241,16 @@ body{
   box-shadow:0 -8px 30px rgba(0,0,0,.2);
 }
 .overlay.open .sheet{transform:translateY(0);}
-.sheet-title{font-size:14px;font-weight:800;margin-bottom:12px;}
+.sheet-title{font-size:var(--fs-lg);font-weight:800;margin-bottom:12px;}
 .sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .sheet-grid .full{grid-column:1/-1;}
 .lbl-in{display:flex;flex-direction:column;gap:4px;}
-.lbl-in label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.lbl-in label{font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
 .s-in{
   width:100%;background:var(--bg);border:none;outline:none;
   box-shadow:var(--in);border-radius:10px;
   padding:10px 12px;
-  font:600 13px/1 'Inter',sans-serif;color:var(--fg);
+  font:600 var(--fs-md)/1 'Inter',sans-serif;color:var(--fg);
   -webkit-appearance:none;
 }
 .s-in::placeholder{color:var(--muted);opacity:.4;font-weight:400;}
@@ -257,7 +258,7 @@ body{
 .sheet-btns{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;}
 .s-btn{
   height:46px;border:none;border-radius:12px;
-  font:700 13px/1 'Inter',sans-serif;cursor:pointer;
+  font:700 var(--fs-md)/1 'Inter',sans-serif;cursor:pointer;
   background:var(--bg);box-shadow:var(--up-sm);color:var(--muted);
 }
 .s-btn.ok{background:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-g);}
@@ -344,7 +345,7 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
 <!-- PHIEU STRIP -->
 <div class="phieu-strip">
   <div>
-    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Số phiếu</div>
+    <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Số phiếu</div>
     <div class="no" id="phieu-no">PM---------</div>
   </div>
   <span class="dt" id="phieu-dt">--/--/----</span>
@@ -438,15 +439,15 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
   <div class="settings-sheet">
     <div class="sheet-title">Cài đặt</div>
     <div class="settings-item">
-      <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Nhân viên thu mua</label>
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Nhân viên thu mua</label>
       <input class="s-in" id="nv-name" placeholder="Tên nhân viên..." autocomplete="off">
     </div>
     <div class="settings-item">
-      <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase URL</label>
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase URL</label>
       <input class="s-in" id="sb-url" placeholder="https://xxx.supabase.co" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div class="settings-item">
-      <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase Anon Key</label>
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase Anon Key</label>
       <input class="s-in" id="sb-key" placeholder="eyJhbG..." autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div style="margin-top:4px;">
