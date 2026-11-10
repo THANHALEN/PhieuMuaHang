@@ -123,8 +123,9 @@ body{
   display:flex;align-items:center;gap:3px;cursor:pointer;
   background:none;border:none;padding:2px 4px;border-radius:6px;
 }
+.sec-btns{display:flex;align-items:center;gap:6px;}
 .sec-add:active{opacity:.6;}
-.sec-add svg{width:12px;height:12px;fill:none;stroke:var(--accent);stroke-width:2.8;stroke-linecap:round;}
+.sec-add svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2.8;stroke-linecap:round;}
 
 /* INFO BLOCK */
 .info-block{
@@ -366,10 +367,12 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
 
   <div class="sec-row">
     <span class="sec-lbl">Hàng hóa</span>
-    <button class="sec-add" onclick="openAddItem()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Thêm hàng hóa
-    </button>
+    <div class="sec-btns">
+      <button class="sec-add" onclick="addSampleItems()" aria-label="Thêm dữ liệu mẫu để test">Test</button>
+      <button class="sec-add" onclick="openAddItem()" aria-label="Thêm hàng hóa">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="items-wrap">
@@ -708,6 +711,18 @@ function renderItems(){
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function removeItem(i){items.splice(i,1);renderItems();}
+/* Nút Test: thêm dòng hàng mẫu (dữ liệu giả) vào phiếu đang nhập; chỉ nằm trong bộ nhớ tới khi bấm Lưu tạm/Chốt. */
+function addSampleItems(){
+  items.push(
+    {hang:'Bã khoai lang',seller:'Nguyễn Văn A',sl:12500,tc:2.5,gia:1850},
+    {hang:'Vỏ sắn tươi',seller:'Trần Thị B',sl:8300,tc:1.2,gia:2100},
+    {hang:'Sắn lát khô',seller:'Phạm Văn D',sl:15200,tc:0.8,gia:4300}
+  );
+  renderItems();
+  const list=document.getElementById('items-list');
+  list.scrollTop=list.scrollHeight;
+  showToast('Đã thêm 3 dòng mẫu (chưa lưu)');
+}
 function updateItem(i,field,val){items[i][field]=parseVN(val)||0;}
 
 /* ══════════════════════════════

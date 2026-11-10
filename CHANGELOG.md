@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.7 - 2026-11-10
+- Nút thêm hàng hóa chỉ còn dấu + (có aria-label); thêm nút Test cạnh dấu + để thêm 3 dòng hàng mẫu vào phiếu đang nhập.
+
 ## 1.6 - 2026-11-10
 - Bỏ nhãn chữ ở các nút thanh hành động dưới (màn chính và xem trước phiếu in), chỉ còn biểu tượng; thêm aria-label.
 
