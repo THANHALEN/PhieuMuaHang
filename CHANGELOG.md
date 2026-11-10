@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.15 - 2026-11-10
+- Preview A5: tổng SL gióng phải đúng mép số liệu cột SL (ô tổng dùng flex-end, không tràn phải).
+
 ## 1.14 - 2026-11-10
 - Preview A5: dòng Tổng bỏ chữ "đ", hai giá trị tổng (SL, Thành tiền) gióng phải đúng mép số liệu của cột tương ứng.
 
