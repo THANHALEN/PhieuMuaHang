@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.10 - 2026-11-10
+- Preview A5: khung rộng sát mép; mọi chữ trong bảng cùng 11px (kể cả tiêu đề cột và STT); tiêu đề cột/tên dài tự xuống dòng thay vì bị cắt; dòng Tổng dùng một khối liền (đường đỏ không đứt); nhãn Người bán/NV Thu mua cùng cỡ tiêu đề bảng.
+
 ## 1.9 - 2026-11-10
 - Preview A5: ngày giờ căn phải, bỏ NV thu mua ở dòng thông tin, tiêu đề cột "Thông tin hàng hóa", dòng Tổng canh theo cột; tên hàng/phân loại/người bán cùng cỡ 11px với số liệu.
 
