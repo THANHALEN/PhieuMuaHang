@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.6 - 2026-11-10
+- Bỏ nhãn chữ ở các nút thanh hành động dưới (màn chính và xem trước phiếu in), chỉ còn biểu tượng; thêm aria-label.
+
 ## 1.5 - 2026-11-10
 - Chuẩn hóa cỡ chữ về thang cỡ chữ (12/13/13/13/14px) bằng biến CSS `--fs-*`, chữ to hơn dễ đọc trên điện thoại; bản in không đổi.
 

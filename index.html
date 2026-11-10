@@ -217,13 +217,10 @@ body{
 }
 .act:active{transform:scale(.96);box-shadow:var(--in);}
 .act svg{width:20px;height:20px;fill:none;stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-.act span{font-size:var(--fs-xs);font-weight:800;color:var(--muted);letter-spacing:.3px;}
 .act.primary{background:var(--accent);box-shadow:0 4px 14px var(--accent-g);}
 .act.primary svg{stroke:#fff;}
-.act.primary span{color:rgba(255,255,255,.88);}
 .act.primary:active{box-shadow:var(--in);}
 .act.sec svg{stroke:var(--accent);}
-.act.sec span{color:var(--accent);}
 
 /* ── DIALOG (thêm hàng) ── */
 .overlay{
@@ -387,17 +384,14 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
 
 <!-- ACTION BAR -->
 <div class="actions">
-  <button class="act" onclick="saveDraft()">
+  <button class="act" onclick="saveDraft()" aria-label="Lưu tạm">
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-    <span>LƯU TẠM</span>
   </button>
-  <button class="act primary" onclick="chot()">
+  <button class="act primary" onclick="chot()" aria-label="Chốt phiếu">
     <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-    <span>CHỐT PHIẾU</span>
   </button>
-  <button class="act sec" onclick="showPrint()">
+  <button class="act sec" onclick="showPrint()" aria-label="In phiếu">
     <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-    <span>IN PHIẾU</span>
   </button>
 </div>
 
@@ -473,13 +467,11 @@ table.pv-tbl td.r{text-align:right;font-family:'JetBrains Mono',monospace;font-s
     <div class="pv-page" id="pv-content"></div>
   </div>
   <div class="actions pv-actions">
-    <button class="act" onclick="downloadPrint()">
+    <button class="act" onclick="downloadPrint()" aria-label="Tải PDF">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <span>TẢI PDF</span>
     </button>
-    <button class="act primary" onclick="window.print()">
+    <button class="act primary" onclick="window.print()" aria-label="In ngay">
       <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      <span>IN NGAY</span>
     </button>
   </div>
 </div>
