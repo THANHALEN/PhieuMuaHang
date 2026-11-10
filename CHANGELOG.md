@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.16 - 2026-11-10
+- Preview A5: tăng lề hai bên từ 5px lên 8px (hiệu ứng lọt lòng).
+
 ## 1.15 - 2026-11-10
 - Preview A5: tổng SL gióng phải đúng mép số liệu cột SL (ô tổng dùng flex-end, không tràn phải).
 
