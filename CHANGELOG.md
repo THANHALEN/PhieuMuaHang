@@ -2,6 +2,9 @@
 
 Version dạng `MAJOR.MINOR`, nguồn duy nhất: `VERSION` trong `phieu-mua-sw.js`. Mỗi release thêm một mục ở đầu file này.
 
+## 1.13 - 2026-11-10
+- Preview A5: in đậm toàn bộ bảng; tiêu đề cột canh giữa, nền xám đậm hơn, chữ đen đậm cho nổi bật.
+
 ## 1.12 - 2026-11-10
 - Preview A5: in đậm toàn bộ giá trị các cột SL, % Tạp, Giá, Thành tiền.
 

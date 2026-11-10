@@ -1,5 +1,5 @@
 // Nguồn sự thật duy nhất của version (dạng MAJOR.MINOR, vd 1.0 -> 1.1). Đổi ở mỗi release -> cache + SW đổi -> client tự cập nhật
-const VERSION='1.12';
+const VERSION='1.13';
 const CACHE='phieu-mua-'+VERSION;
 const BASE='/PhieuMuaHang/';
 const SHELL=[BASE,BASE+'index.html',BASE+'phieu-mua.webmanifest',BASE+'icons/icon-192.png',BASE+'icons/icon-512.png'];
