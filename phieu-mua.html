@@ -165,15 +165,24 @@ body{
   flex:0 0 auto; /* cao theo nội dung, xếp nối tiếp từ đỉnh box */
   display:flex;flex-direction:column;justify-content:flex-start;
   padding:8px 10px;
-  border-bottom:1px solid var(--sh-d);
   gap:3px;
-  transition:background .15s;
+  background:var(--bg);position:relative; /* nằm trên .swipe-del (absolute) */
+  transition:transform .2s ease;
+  touch-action:pan-y; /* cuộn dọc bình thường, vuốt ngang do JS xử lý */
 }
-.item-row:last-child{border-bottom:none;}
-.item-row:active{background:rgba(0,0,0,.03);}
+.item-row.drag{transition:none;}
+/* Vuốt trái để lộ giỏ rác */
+.swipe{position:relative;overflow:hidden;flex:0 0 auto;border-bottom:1px solid var(--sh-d);}
+.swipe:last-child{border-bottom:none;}
+.swipe-del{
+  position:absolute;top:0;right:0;bottom:0;width:64px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--accent);border:none;cursor:pointer;
+}
+.swipe-del svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
 
-/* Bảng hàng hóa: đầu bảng và dòng dùng chung lưới cột (tên | SL | %Tạp | Giá | ×) */
-.items-head,.item-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 48px 66px 20px;column-gap:5px;align-items:center;}
+/* Bảng hàng hóa: đầu bảng và dòng dùng chung lưới cột (tên | SL | %Tạp | Giá) */
+.items-head,.item-row{display:grid;grid-template-columns:minmax(0,1fr) 62px 46px 54px;column-gap:5px;align-items:center;}
 .items-head{
   flex-shrink:0;padding:7px 10px;
   font-size:var(--fs-xs);font-weight:800;color:var(--fg);
@@ -190,13 +199,6 @@ body{
 .item-name{font-size:var(--fs-lg);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-cat{color:var(--accent);font-size:var(--fs-lg);font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .seller{font-size:var(--fs-sm);font-weight:600;color:var(--muted);}
-.x-btn{
-  width:20px;height:20px;border:none;border-radius:50%;
-  background:transparent;font-size:var(--fs-lg);color:var(--muted);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;opacity:.5;padding:0;line-height:1;
-}
-.x-btn:active{opacity:1;color:var(--accent);}
 
 .mv{
   background:var(--bg);box-shadow:var(--in);
@@ -391,7 +393,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   </div>
 
   <div class="items-wrap">
-    <div class="items-head"><span>Mặt hàng / NCC</span><span>SL (kg)</span><span>% Tạp</span><span>Giá (đ/kg)</span><span></span></div>
+    <div class="items-head"><span>Mặt hàng / NCC</span><span>SL (kg)</span><span>% Tạp</span><span>Giá (đ/kg)</span></div>
     <div class="items-list" id="items-list">
       <div class="empty-state" id="empty-state">
         <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/></svg>
@@ -433,7 +435,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       </div>
       <div class="lbl-in">
         <label>SL (kg)</label>
-        <input class="s-in mono" id="f-sl" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+        <input class="s-in mono" id="f-sl" maxlength="6" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
       </div>
       <div class="lbl-in">
         <label>% Tạp chất</label>
@@ -441,7 +443,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       </div>
       <div class="lbl-in full">
         <label>Giá (đ/kg)</label>
-        <input class="s-in mono" id="f-gia" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+        <input class="s-in mono" id="f-gia" maxlength="5" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
       </div>
     </div>
     <div class="sheet-btns">
@@ -692,7 +694,7 @@ function confirmAdd(){
   const gia=document.getElementById('f-gia').value.trim();
   if(!hang){showToast('Nhập tên hàng hóa','error');return;}
   if(!seller){showToast('Nhập tên người bán','error');return;}
-  items.push({hang,phanloai,seller,sl:parseVN(sl)||0,tc:parseVN(tc)||0,gia:parseVN(gia)||0});
+  items.push({hang,phanloai,seller,sl:Math.min(parseVN(sl)||0,MAX.sl),tc:parseVN(tc)||0,gia:Math.min(parseVN(gia)||0,MAX.gia)});
   closeAdd();
   renderItems();
   const list=document.getElementById('items-list');
@@ -712,9 +714,9 @@ function renderItems(){
   }
   list.innerHTML='';
   items.forEach((it,i)=>{
-    const row=document.createElement('div');
-    row.className='item-row';
-    row.innerHTML=`
+    const wrap=document.createElement('div');
+    wrap.className='swipe';
+    wrap.innerHTML=`<button class="swipe-del" aria-label="Xoá dòng" onclick="removeItem(${i})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button><div class="item-row">
       <div class="item-main">
         <span class="tag">${String(i+1).padStart(2,'0')}</span>
         <div class="item-name-wrap">
@@ -723,13 +725,46 @@ function renderItems(){
           <span class="seller">${esc(it.seller)}</span>
         </div>
       </div>
-      <input class="mv" aria-label="SL (kg)" value="${toVN(it.sl)}" onchange="updateItem(${i},'sl',this.value)" inputmode="decimal">
+      <input class="mv" aria-label="SL (kg)" maxlength="6" value="${toVN(it.sl)}" onchange="updateItem(${i},'sl',this.value)" inputmode="decimal">
       <input class="mv" aria-label="% Tạp" value="${toVN(it.tc,1)}" onchange="updateItem(${i},'tc',this.value)" inputmode="decimal">
-      <input class="mv" aria-label="Giá (đ/kg)" value="${toVN(it.gia)}" onchange="updateItem(${i},'gia',this.value)" inputmode="decimal">
-      <button class="x-btn" aria-label="Xoá dòng" onclick="removeItem(${i})">×</button>`;
-    list.appendChild(row);
+      <input class="mv" aria-label="Giá (đ/kg)" maxlength="5" value="${toVN(it.gia)}" onchange="updateItem(${i},'gia',this.value)" inputmode="decimal">
+    </div>`;
+    list.appendChild(wrap);
   });
 }
+/* Vuốt trái trên dòng để lộ giỏ rác (event delegation, gắn một lần). Bắt đầu vuốt trên <input> thì bỏ qua để vẫn gõ được. */
+(function(){
+  const list=document.getElementById('items-list');
+  const W=64;let cur=null,x0=0,y0=0,base=0,locked=false,open=null;
+  function setX(r,x){r.style.transform=x?`translateX(${x}px)`:'';}
+  function closeOpen(except){if(open&&open!==except){setX(open,0);open=null;}}
+  list.addEventListener('pointerdown',e=>{
+    const r=e.target.closest('.item-row');
+    if(!r||e.target.closest('input')){closeOpen(null);return;}
+    closeOpen(r);
+    cur=r;x0=e.clientX;y0=e.clientY;base=(r===open)?-W:0;locked=false;
+  });
+  list.addEventListener('pointermove',e=>{
+    if(!cur)return;
+    const dx=e.clientX-x0,dy=e.clientY-y0;
+    if(!locked){
+      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){cur=null;return;}
+      if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)){locked=true;cur.classList.add('drag');try{list.setPointerCapture(e.pointerId);}catch(_){/* capture không bắt buộc */}}
+      else return;
+    }
+    setX(cur,Math.max(-W,Math.min(0,base+dx)));
+  });
+  function end(e){
+    if(!cur)return;
+    const r=cur;cur=null;
+    if(!locked)return;
+    r.classList.remove('drag');
+    const x=Math.max(-W,Math.min(0,base+(e.clientX-x0)));
+    if(x<-W/2){setX(r,-W);open=r;}else{setX(r,0);if(open===r)open=null;}
+  }
+  list.addEventListener('pointerup',end);
+  list.addEventListener('pointercancel',end);
+})();
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function removeItem(i){items.splice(i,1);renderItems();}
 /* Nút Test: thêm dòng hàng mẫu (dữ liệu giả) vào phiếu đang nhập; chỉ nằm trong bộ nhớ tới khi bấm Lưu tạm/Chốt. */
@@ -744,7 +779,15 @@ function addSampleItems(){
   list.scrollTop=list.scrollHeight;
   showToast('Đã thêm 3 dòng mẫu (chưa lưu)');
 }
-function updateItem(i,field,val){items[i][field]=parseVN(val)||0;}
+/* Giới hạn hiển thị theo cột: SL tối đa 99.999, Giá tối đa 9.999 */
+const MAX={sl:99999,gia:9999};
+function updateItem(i,field,val){
+  let n=parseVN(val)||0;
+  const over=MAX[field]!==undefined&&n>MAX[field];
+  if(over)n=MAX[field];
+  items[i][field]=n;
+  if(over){renderItems();showToast('Vượt giới hạn, đã đặt về '+toVN(n),'error');}
+}
 
 /* ══════════════════════════════
    INIT PHIEU
