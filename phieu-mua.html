@@ -203,7 +203,7 @@ body{
 .mv{
   background:var(--bg);box-shadow:var(--in);
   border-radius:7px;padding:clamp(3px,.8vh,5px) 6px;
-  font:700 var(--fs-md)/1 'JetBrains Mono',monospace;
+  font:700 11px/1 'Inter',sans-serif;font-variant-numeric:tabular-nums; /* giống bảng preview A5 */
   color:var(--fg);border:none;outline:none;width:100%;
   -webkit-appearance:none;text-align:right;
 }
@@ -318,6 +318,8 @@ body{
 table.pv-tbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px;font-variant-numeric:tabular-nums;font-family:'Inter',sans-serif;}
 table.pv-tbl th{background:#e2e8f0;color:#0f172a;border-bottom:2px solid #64748b;padding:6px 1px;font-size:11px;font-weight:800;text-transform:uppercase;line-height:1.25;vertical-align:middle;text-align:center;}
 table.pv-tbl th.c{text-align:center;}
+table.pv-tbl th:nth-child(n+3){text-align:right;padding-right:1px;} /* tiêu đề cột số cùng mép phải với số */
+table.pv-tbl th:last-child{padding-right:2px;}
 table.pv-tbl th.nm{padding-left:3px;white-space:nowrap;}
 table.pv-tbl td{padding:5px 1px;border-bottom:1px solid #e2e8f0;vertical-align:top;font-weight:700;}
 table.pv-tbl td.i{text-align:center;color:#64748b;}
