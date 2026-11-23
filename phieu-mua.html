@@ -571,7 +571,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
 const DB_NAME='phieu_mua_db', STORE='pending';
 let db=null, items=[], editIdx=-1;
 let SB_URL='', SB_KEY='', NV_NAME='';
-let currentPhieuNo='', isOnline=false;
+let currentPhieuNo='', isOnline=false, phieuCommitted=false; // phieuCommitted: số phiếu đã được cấp thật (bộ đếm đã tăng)
 
 /* ══════════════════════════════
    UTILS
@@ -671,6 +671,11 @@ async function idbGetAll(store){
    PHIEU NUMBER GENERATOR
    PM-YYYYMMDD-NNNN (sequential per year)
 ══════════════════════════════ */
+/* Xem trước số kế tiếp, KHÔNG tăng bộ đếm (mở app không tiêu số) */
+async function peekPhieuNo(){
+  const rec=await idbGet('counter','counter_'+new Date().getFullYear())||{val:0};
+  return `PM-${yyyymmdd()}-${String(rec.val+1).padStart(4,'0')}`;
+}
 async function nextPhieuNo(){
   const year=new Date().getFullYear();
   const key='counter_'+year;
@@ -866,7 +871,8 @@ function updateItem(i,field,val){
    INIT PHIEU
 ══════════════════════════════ */
 async function initPhieu(){
-  currentPhieuNo=await nextPhieuNo();
+  currentPhieuNo=await peekPhieuNo();
+  phieuCommitted=false;
   document.getElementById('phieu-no').textContent=currentPhieuNo;
   document.getElementById('phieu-dt').textContent=nowDateStr();
 }
@@ -874,7 +880,15 @@ async function initPhieu(){
 /* ══════════════════════════════
    SAVE DRAFT (IndexedDB only)
 ══════════════════════════════ */
+/* Lần lưu đầu tiên của phiếu mới: cấp số thật (tăng bộ đếm) */
+async function ensurePhieuNo(){
+  if(phieuCommitted) return;
+  currentPhieuNo=await nextPhieuNo();
+  phieuCommitted=true;
+  document.getElementById('phieu-no').textContent=currentPhieuNo;
+}
 async function saveDraft(){
+  await ensurePhieuNo();
   const data=buildPayload(false);
   await idbPut(STORE,{...data, id:currentPhieuNo, synced:false});
   showToast(`Đã lưu tạm ${currentPhieuNo}`);
@@ -888,6 +902,7 @@ async function chot(){
   if(!bienSo){showToast('Nhập biển số xe','error');return;}
   if(!items.length){showToast('Chưa có hàng hóa','error');return;}
 
+  await ensurePhieuNo();
   const data=buildPayload(true);
   await idbPut(STORE,{...data, id:currentPhieuNo, synced:false});
 
@@ -944,8 +959,10 @@ async function syncOne(data){
     if(res.ok||res.status===201||res.status===200){
       await idbPut(STORE,{id:data.phieu_no,...data,synced:true});
       showToast(`Đã chốt phiếu ${data.phieu_no}`,'success');
-      await initPhieu(); items=[]; renderItems();
-      document.getElementById('bien-so').value='';
+      if(data.phieu_no===currentPhieuNo){ // chỉ làm mới form khi phiếu vừa chốt là phiếu đang nhập; sync nền phiếu cũ không được xoá phiếu đang gõ
+        await initPhieu(); items=[]; renderItems();
+        document.getElementById('bien-so').value='';
+      }
     } else {
       const err=await res.text();
       showToast('Lỗi sync: '+res.status,'error');
@@ -1038,6 +1055,7 @@ function editRec(){
   const r=recCur; if(!r) return;
   if((items.length||document.getElementById('bien-so').value.trim())&&!confirm('Phiếu đang nhập sẽ bị thay bằng bản tạm này (phiếu đang nhập chưa lưu sẽ mất). Tiếp tục?')) return;
   currentPhieuNo=r.phieu_no||r.id;
+  phieuCommitted=true;
   items=r.items.map(i=>({...i}));
   document.getElementById('bien-so').value=r.bien_so||'';
   document.getElementById('phieu-no').textContent=currentPhieuNo;
