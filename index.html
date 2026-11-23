@@ -523,7 +523,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       <button class="h-tab on" data-t="all" onclick="setHistTab('all')">Tất cả</button>
       <button class="h-tab" data-t="draft" onclick="setHistTab('draft')">Tạm lưu</button>
       <button class="h-tab" data-t="wait" onclick="setHistTab('wait')">Chờ sync</button>
-      <button class="h-tab" data-t="done" onclick="setHistTab('done')">Đã chốt</button>
+      <button class="h-tab" data-t="done" onclick="setHistTab('done');refreshHist()">Đã chốt</button>
     </div>
     <div class="h-cnt" id="h-cnt"></div>
   </div>
@@ -1009,12 +1009,59 @@ function recTotals(r){
   return {sl:its.reduce((s,i)=>s+i.sl,0), tien:Math.round(its.reduce((s,i)=>s+i.sl*(1-i.tc/100)*i.gia,0))};
 }
 function normTxt(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();}
-async function openHist(){
-  try{histAll=(await idbGetAll(STORE)).filter(r=>r&&Array.isArray(r.items));}
-  catch(e){console.error(e);showToast('Không đọc được lịch sử','error');return;}
+let histSrc='';
+async function loadHistLocal(){
+  histAll=(await idbGetAll(STORE)).filter(r=>r&&Array.isArray(r.items));
   histAll.sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+}
+/* Kéo danh sách phiếu đã chốt từ Supabase về kho máy (Supabase là nguồn đúng cho phiếu đã chốt).
+   - Phiếu có trên server → ghi đè bản máy thành final+synced (trừ khi máy đang có BẢN TẠM cùng số: giữ bản tạm).
+   - Phiếu máy đang 'đã sync' nhưng server không còn → chuyển 'chờ sync' (không xoá dữ liệu). */
+const REMOTE_LIMIT=1000;
+async function pullRemote(){
+  if(!navigator.onLine||!SB_URL||!SB_KEY){histSrc='Offline · hiển thị dữ liệu trên máy';return false;}
+  const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),10000);
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/phieu_mua_hang?select=phieu_no,bien_so,nv_thu_mua,items,tong_sl,created_at&order=created_at.desc&limit=${REMOTE_LIMIT}`,{
+      headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},cache:'no-store',signal:ctl.signal
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows=await res.json();
+    if(!Array.isArray(rows)) throw new Error('Phản hồi không phải danh sách');
+    const local=new Map((await idbGetAll(STORE)).map(r=>[String(r.id),r]));
+    const remoteIds=new Set();
+    for(const r of rows){
+      if(!r||!r.phieu_no||!Array.isArray(r.items)) continue;
+      remoteIds.add(String(r.phieu_no));
+      const l=local.get(String(r.phieu_no));
+      if(l&&!l.final) continue; // bản tạm trên máy trùng số: giữ nguyên
+      await idbPut(STORE,{id:r.phieu_no,phieu_no:r.phieu_no,bien_so:r.bien_so||'',nv_thu_mua:r.nv_thu_mua||'',items:r.items,tong_sl:r.tong_sl,created_at:r.created_at,final:true,synced:true});
+    }
+    if(rows.length<REMOTE_LIMIT){ // danh sách đầy đủ mới dám kết luận "server không còn"
+      for(const [id,l] of local){
+        if(l.final&&l.synced&&!remoteIds.has(id)) await idbPut(STORE,{...l,synced:false});
+      }
+    }
+    histSrc='Đồng bộ Supabase '+fmtDT(new Date().toISOString()).split(' · ')[1];
+    return true;
+  }catch(e){
+    console.error('pullRemote',e);
+    histSrc='Không tải được Supabase ('+(e&&e.name==='AbortError'?'quá thời gian':(e&&e.message||e))+') · hiển thị dữ liệu trên máy';
+    return false;
+  }finally{clearTimeout(to);}
+}
+async function refreshHist(){
+  histSrc='Đang đồng bộ Supabase...';renderHist();
+  await pullRemote();
+  try{await loadHistLocal();}catch(e){console.error(e);}
+  if(document.getElementById('hist-view').classList.contains('show')) renderHist();
+}
+async function openHist(){
+  try{await loadHistLocal();}
+  catch(e){console.error(e);showToast('Không đọc được lịch sử','error');return;}
   document.getElementById('hist-view').classList.add('show');
   renderHist();
+  refreshHist();
 }
 function closeHist(){document.getElementById('hist-view').classList.remove('show');}
 function setHistTab(t){
@@ -1030,7 +1077,7 @@ function renderHist(){
     const hay=normTxt([r.id,r.phieu_no,r.bien_so,...r.items.flatMap(i=>[i.hang,i.phanloai,i.seller])].join(' '));
     return hay.includes(q);
   });
-  document.getElementById('h-cnt').textContent=`${rows.length} / ${histAll.length} phiếu`;
+  document.getElementById('h-cnt').textContent=`${rows.length} / ${histAll.length} phiếu`+(histSrc?` · ${histSrc}`:'');
   const list=document.getElementById('h-list');
   if(!rows.length){list.innerHTML='<div class="empty-state" style="padding:40px 0"><p>Không có phiếu nào</p></div>';return;}
   list.innerHTML=rows.map(r=>{
