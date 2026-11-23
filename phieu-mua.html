@@ -782,9 +782,11 @@ function confirmAdd(){
 /* ══════════════════════════════
    RENDER ITEMS
 ══════════════════════════════ */
+// Giữ tham chiếu ngay từ đầu: list.innerHTML='' gỡ #empty-state khỏi DOM, lần render sau getElementById sẽ trả null → appendChild(null) lỗi
+const EMPTY_EL=document.getElementById('empty-state');
 function renderItems(){
   const list=document.getElementById('items-list');
-  const empty=document.getElementById('empty-state');
+  const empty=EMPTY_EL;
   if(!items.length){
     list.innerHTML='';
     list.appendChild(empty);
