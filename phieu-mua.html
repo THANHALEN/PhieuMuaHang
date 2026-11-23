@@ -130,9 +130,10 @@ body{
 /* INFO BLOCK */
 .info-block{
   flex-shrink:0;
-  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  display:block;
   padding-bottom:4px;
 }
+.nm-plate{width:calc(12ch + 20px);max-width:100%;}
 .field{display:flex;flex-direction:column;gap:3px;}
 .field label{font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
 .nm-in{
@@ -290,6 +291,16 @@ body{
   padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0);
 }
 #print-view.show{display:flex;}
+@page{size:A5;margin:8mm;}
+@media print{
+  html,body{background:#fff!important;height:auto!important;overflow:visible!important;}
+  body>*:not(#print-view){display:none!important;}
+  #print-view{position:static!important;display:block!important;background:#fff!important;padding:0!important;}
+  .pv-hdr,.actions.pv-actions{display:none!important;}
+  .pv-body{overflow:visible!important;padding:0!important;}
+  .pv-page{max-width:none!important;margin:0!important;border:none!important;border-radius:0!important;box-shadow:none!important;padding:0!important;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
 /* Thanh trên của màn In phiếu: cùng kích thước/vị trí với .hdr của màn chính */
 .pv-hdr{
   flex-shrink:0;
@@ -376,11 +387,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   <div class="info-block">
     <div class="field">
       <label>Biển số xe</label>
-      <input class="nm-in" id="bien-so" placeholder="51B-123.45" autocapitalize="characters" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Ghi chú</label>
-      <input class="nm-in" id="ghi-chu" placeholder="Ghi chú..." autocomplete="off">
+      <input class="nm-in nm-plate" id="bien-so" placeholder="51B-123.45" maxlength="11" autocapitalize="characters" autocomplete="off" onblur="this.value=fmtPlate(this.value)">
     </div>
   </div>
 
@@ -827,11 +834,18 @@ async function chot(){
   }
 }
 
+/* Định dạng biển số: 51b12345 → 51B-123.45; 29ab12345 → 29AB-123.45; 51b1234 → 51B-1234. Không khớp → chỉ viết hoa. */
+function fmtPlate(s){
+  const raw=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const m=raw.match(/^(\d{2})([A-Z]{1,2}\d??)(\d{4,5})$/);
+  if(!m) return raw?String(s).trim().toUpperCase():'';
+  const d=m[3];
+  return `${m[1]}${m[2]}-${d.length===5?d.slice(0,3)+'.'+d.slice(3):d}`;
+}
 function buildPayload(final=false){
   return {
     phieu_no: currentPhieuNo,
-    bien_so: document.getElementById('bien-so').value.trim(),
-    ghi_chu: document.getElementById('ghi-chu').value.trim(),
+    bien_so: fmtPlate(document.getElementById('bien-so').value),
     nv_thu_mua: NV_NAME,
     items: items.map(it=>({...it})),
     tong_sl: items.reduce((s,it)=>s+it.sl,0),
@@ -857,7 +871,6 @@ async function syncOne(data){
       body:JSON.stringify({
         phieu_no: data.phieu_no,
         bien_so: data.bien_so,
-        ghi_chu: data.ghi_chu,
         nv_thu_mua: data.nv_thu_mua,
         items: data.items,
         tong_sl: data.tong_sl,
@@ -869,7 +882,6 @@ async function syncOne(data){
       showToast(`Đã chốt phiếu ${data.phieu_no}`,'success');
       await initPhieu(); items=[]; renderItems();
       document.getElementById('bien-so').value='';
-      document.getElementById('ghi-chu').value='';
     } else {
       const err=await res.text();
       showToast('Lỗi sync: '+res.status,'error');
@@ -893,8 +905,9 @@ async function syncPending(){
 ══════════════════════════════ */
 function showPrint(){
   if(!items.length){showToast('Chưa có hàng hóa để in','error');return;}
-  const bienSo=document.getElementById('bien-so').value.trim()||'---';
-  const ghiChu=document.getElementById('ghi-chu').value.trim();
+  const bsEl=document.getElementById('bien-so');
+  bsEl.value=fmtPlate(bsEl.value);
+  const bienSo=bsEl.value.trim()||'---';
   const tongSL=items.reduce((s,it)=>s+it.sl,0);
   const tongTien=items.reduce((s,it)=>s+(it.sl*(1-it.tc/100)*it.gia),0);
 
@@ -919,7 +932,6 @@ function showPrint(){
     </div>
     <div class="pv-info">
       <span>Biển số xe: <b>${esc(bienSo)}</b></span>
-      ${ghiChu?`<span>Ghi chú: <b>${esc(ghiChu)}</b></span>`:''}
     </div>
     <table class="pv-tbl">
       <colgroup><col style="width:4%"><col style="width:38%"><col style="width:13%"><col style="width:12%"><col style="width:10%"><col style="width:23%"></colgroup>
