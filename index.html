@@ -291,8 +291,29 @@ body{
   padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0);
 }
 #print-view.show{display:flex;}
+/* ── HISTORY ── */
+#hist-view{display:none;position:fixed;inset:0;z-index:150;background:var(--bg);flex-direction:column;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0);}
+#hist-view.show{display:flex;}
+.h-tools{flex-shrink:0;padding:8px 14px 6px;display:flex;flex-direction:column;gap:8px;}
+.h-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.h-tab{border:none;border-radius:10px;padding:7px 2px;background:var(--bg);box-shadow:var(--up-sm);font:700 var(--fs-xs)/1.1 'Inter',sans-serif;color:var(--muted);cursor:pointer;}
+.h-tab.on{box-shadow:var(--in);color:var(--accent);}
+.h-list{flex:1;min-height:0;overflow-y:auto;padding:4px 14px 14px;display:flex;flex-direction:column;gap:8px;}
+.h-row{border:none;text-align:left;width:100%;background:var(--bg);box-shadow:var(--up-sm);border-radius:12px;padding:9px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;cursor:pointer;color:var(--fg);font-family:'Inter',sans-serif;}
+.h-row:active{box-shadow:var(--in);}
+.h-no{font:700 var(--fs-md)/1.2 'JetBrains Mono',monospace;color:var(--accent);}
+.h-st{font-size:var(--fs-xs);font-weight:800;padding:2px 8px;border-radius:999px;align-self:start;}
+.h-st.draft{background:var(--accent-soft);color:var(--accent);}
+.h-st.wait{background:rgba(200,140,0,.15);color:#a86b00;}
+.h-st.done{background:var(--green-g);color:var(--green);}
+.h-sub{font-size:var(--fs-sm);font-weight:600;color:var(--muted);}
+.h-sum{grid-column:1/3;font-size:var(--fs-sm);font-weight:700;display:flex;justify-content:space-between;}
+.h-cnt{font-size:var(--fs-xs);color:var(--muted);font-weight:600;padding:0 2px;}
+.hist-btn{display:flex;align-items:center;gap:4px;border:none;background:none;color:var(--accent);font:800 var(--fs-sm)/1 'Inter',sans-serif;padding:4px 6px;cursor:pointer;}
+.hist-btn svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
 @page{size:A5;margin:8mm;}
 @media print{
+  #hist-view,#rec-overlay{display:none!important;}
   html,body{background:#fff!important;height:auto!important;overflow:visible!important;}
   body>*:not(#print-view){display:none!important;}
   #print-view{position:static!important;display:block!important;background:#fff!important;padding:0!important;}
@@ -377,7 +398,10 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
     <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Số phiếu</div>
     <div class="no" id="phieu-no">PM---------</div>
   </div>
-  <span class="dt" id="phieu-dt">--/--/----</span>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span class="dt" id="phieu-dt">--/--/----</span>
+    <button class="hist-btn" onclick="openHist()" aria-label="Lịch sử phiếu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Lịch sử</button>
+  </div>
 </div>
 
 <!-- ZONE -->
@@ -483,6 +507,35 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       <button class="s-btn" style="width:100%;margin-bottom:8px;" onclick="copySetupLink()">Sao chép link cài nhanh</button>
       <button class="s-btn ok" style="width:100%;" onclick="saveSettings()">Lưu cài đặt</button>
     </div>
+  </div>
+</div>
+
+<!-- HISTORY VIEW -->
+<div id="hist-view">
+  <div class="pv-hdr">
+    <span class="pv-hdr-sp"></span>
+    <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Lịch sử phiếu</h1></div>
+    <button class="icon-btn" onclick="closeHist()" aria-label="Đóng"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="h-tools">
+    <input class="nm-in" id="h-q" type="search" placeholder="Tìm số phiếu, biển số, hàng, người bán..." autocomplete="off" oninput="renderHist()">
+    <div class="h-tabs" id="h-tabs">
+      <button class="h-tab on" data-t="all" onclick="setHistTab('all')">Tất cả</button>
+      <button class="h-tab" data-t="draft" onclick="setHistTab('draft')">Tạm lưu</button>
+      <button class="h-tab" data-t="wait" onclick="setHistTab('wait')">Chờ sync</button>
+      <button class="h-tab" data-t="done" onclick="setHistTab('done')">Đã chốt</button>
+    </div>
+    <div class="h-cnt" id="h-cnt"></div>
+  </div>
+  <div class="h-list" id="h-list"></div>
+</div>
+
+<!-- RECORD ACTION SHEET -->
+<div class="overlay" id="rec-overlay" onclick="closeRec(event)">
+  <div class="sheet">
+    <div class="sheet-title" id="rec-title"></div>
+    <div id="rec-info" style="font-size:var(--fs-sm);font-weight:600;color:var(--muted);margin-bottom:12px;line-height:1.5;"></div>
+    <div class="sheet-btns" id="rec-btns"></div>
   </div>
 </div>
 
@@ -594,6 +647,14 @@ function idbPut(store,val){
     const tx=db.transaction(store,'readwrite');
     const req=tx.objectStore(store).put(val);
     req.onsuccess=e=>res(e.target.result);
+    req.onerror=rej;
+  });
+}
+function idbDelete(store,key){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    const req=tx.objectStore(store).delete(key);
+    req.onsuccess=()=>res();
     req.onerror=rej;
   });
 }
@@ -904,17 +965,116 @@ async function syncPending(){
 }
 
 /* ══════════════════════════════
+   LỊCH SỬ PHIẾU (IndexedDB cục bộ)
+   draft = Tạm lưu; wait = đã chốt, chưa sync; done = đã chốt + đã sync
+══════════════════════════════ */
+let histTab='all', histAll=[], recCur=null;
+function fmtDT(iso){
+  const d=new Date(iso); if(isNaN(d)) return '--';
+  const p=n=>String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} · ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function recStatus(r){return !r.final?'draft':(r.synced?'done':'wait');}
+const ST_LBL={draft:'Tạm lưu',wait:'Chờ sync',done:'Đã chốt'};
+function recTotals(r){
+  const its=r.items||[];
+  return {sl:its.reduce((s,i)=>s+i.sl,0), tien:Math.round(its.reduce((s,i)=>s+i.sl*(1-i.tc/100)*i.gia,0))};
+}
+function normTxt(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();}
+async function openHist(){
+  try{histAll=(await idbGetAll(STORE)).filter(r=>r&&Array.isArray(r.items));}
+  catch(e){console.error(e);showToast('Không đọc được lịch sử','error');return;}
+  histAll.sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+  document.getElementById('hist-view').classList.add('show');
+  renderHist();
+}
+function closeHist(){document.getElementById('hist-view').classList.remove('show');}
+function setHistTab(t){
+  histTab=t;
+  document.querySelectorAll('#h-tabs .h-tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  renderHist();
+}
+function renderHist(){
+  const q=normTxt(document.getElementById('h-q').value.trim());
+  const rows=histAll.filter(r=>{
+    if(histTab!=='all'&&recStatus(r)!==histTab) return false;
+    if(!q) return true;
+    const hay=normTxt([r.id,r.phieu_no,r.bien_so,...r.items.flatMap(i=>[i.hang,i.phanloai,i.seller])].join(' '));
+    return hay.includes(q);
+  });
+  document.getElementById('h-cnt').textContent=`${rows.length} / ${histAll.length} phiếu`;
+  const list=document.getElementById('h-list');
+  if(!rows.length){list.innerHTML='<div class="empty-state" style="padding:40px 0"><p>Không có phiếu nào</p></div>';return;}
+  list.innerHTML=rows.map(r=>{
+    const st=recStatus(r),t=recTotals(r);
+    return `<button class="h-row" data-id="${esc(r.id)}" onclick="openRec(this.dataset.id)">
+      <span class="h-no">${esc(r.phieu_no||r.id)}</span><span class="h-st ${st}">${ST_LBL[st]}</span>
+      <span class="h-sub">${esc(r.bien_so||'(chưa có biển số)')} · ${fmtDT(r.created_at)}</span><span></span>
+      <span class="h-sum"><span>${r.items.length} dòng · ${toVN(t.sl)} kg</span><span>${toVN(t.tien)} đ</span></span>
+    </button>`;
+  }).join('');
+}
+function openRec(id){
+  const r=histAll.find(x=>String(x.id)===String(id)); if(!r) return;
+  recCur=r;
+  const st=recStatus(r),t=recTotals(r);
+  document.getElementById('rec-title').textContent=r.phieu_no||r.id;
+  document.getElementById('rec-info').innerHTML=`${ST_LBL[st]} · ${fmtDT(r.created_at)}<br>Biển số: <b>${esc(r.bien_so||'---')}</b> · ${r.items.length} dòng · ${toVN(t.sl)} kg · ${toVN(t.tien)} đ`;
+  document.getElementById('rec-btns').innerHTML=st==='draft'
+    ? '<button class="s-btn" onclick="viewRec()">Xem / In</button><button class="s-btn ok" onclick="editRec()">Tiếp tục sửa</button><button class="s-btn" style="grid-column:1/3" onclick="delRec()">Xoá bản tạm</button>'
+    : '<button class="s-btn" onclick="closeRec()">Đóng</button><button class="s-btn ok" onclick="viewRec()">Xem / In</button>';
+  document.getElementById('rec-overlay').classList.add('show');
+}
+function closeRec(e){
+  if(e&&e.target!==document.getElementById('rec-overlay')) return;
+  document.getElementById('rec-overlay').classList.remove('show');
+}
+function viewRec(){
+  const r=recCur; if(!r) return;
+  document.getElementById('rec-overlay').classList.remove('show');
+  showPrint(r);
+}
+function editRec(){
+  const r=recCur; if(!r) return;
+  if((items.length||document.getElementById('bien-so').value.trim())&&!confirm('Phiếu đang nhập sẽ bị thay bằng bản tạm này (phiếu đang nhập chưa lưu sẽ mất). Tiếp tục?')) return;
+  currentPhieuNo=r.phieu_no||r.id;
+  items=r.items.map(i=>({...i}));
+  document.getElementById('bien-so').value=r.bien_so||'';
+  document.getElementById('phieu-no').textContent=currentPhieuNo;
+  document.getElementById('phieu-dt').textContent=fmtDT(r.created_at);
+  renderItems();
+  document.getElementById('rec-overlay').classList.remove('show');
+  closeHist();
+  showToast('Đã mở '+currentPhieuNo+' để sửa');
+}
+async function delRec(){
+  const r=recCur; if(!r||r.final) return;
+  if(!confirm('Xoá bản tạm '+(r.phieu_no||r.id)+'? Không khôi phục được.')) return;
+  try{await idbDelete(STORE,r.id);}catch(e){console.error(e);showToast('Không xoá được','error');return;}
+  histAll=histAll.filter(x=>x.id!==r.id);
+  document.getElementById('rec-overlay').classList.remove('show');
+  renderHist();
+  showToast('Đã xoá bản tạm');
+}
+
+/* ══════════════════════════════
    PRINT PREVIEW
 ══════════════════════════════ */
-function showPrint(){
-  if(!items.length){showToast('Chưa có hàng hóa để in','error');return;}
-  const bsEl=document.getElementById('bien-so');
-  bsEl.value=fmtPlate(bsEl.value);
-  const bienSo=bsEl.value.trim()||'---';
-  const tongSL=items.reduce((s,it)=>s+it.sl,0);
-  const tongTien=items.reduce((s,it)=>s+(it.sl*(1-it.tc/100)*it.gia),0);
+let pvNo='';
+function showPrint(rec){
+  let list,bienSo,no,dt;
+  if(rec){list=rec.items;bienSo=rec.bien_so||'---';no=rec.phieu_no||rec.id;dt=fmtDT(rec.created_at);}
+  else{
+    if(!items.length){showToast('Chưa có hàng hóa để in','error');return;}
+    const bsEl=document.getElementById('bien-so');
+    bsEl.value=fmtPlate(bsEl.value);
+    list=items;bienSo=bsEl.value.trim()||'---';no=currentPhieuNo;dt=nowDateStr();
+  }
+  pvNo=no;
+  const tongSL=list.reduce((s,it)=>s+it.sl,0);
+  const tongTien=list.reduce((s,it)=>s+(it.sl*(1-it.tc/100)*it.gia),0);
 
-  let rows=items.map((it,i)=>`
+  let rows=list.map((it,i)=>`
     <tr>
       <td class="i">${i+1}</td>
       <td class="nm"><div class="pv-n">${esc(it.hang)}</div>${it.phanloai?`<div class="pv-c">${esc(it.phanloai)}</div>`:''}<div class="pv-s">${esc(it.seller)}</div></td>
@@ -929,8 +1089,8 @@ function showPrint(){
       <div class="pv-company">Vina InterStarch</div>
       <div class="pv-title">Phiếu Mua Hàng</div>
       <div class="pv-meta">
-        <span>${currentPhieuNo}</span>
-        <span>${nowDateStr()}</span>
+        <span>${esc(no)}</span>
+        <span>${dt}</span>
       </div>
     </div>
     <div class="pv-info">
@@ -958,7 +1118,7 @@ async function downloadPrint(){
     const {default:html2canvas}=await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js');
     const canvas=await html2canvas(document.getElementById('pv-content'),{scale:2,useCORS:true});
     const link=document.createElement('a');
-    link.download=`${currentPhieuNo}.png`;
+    link.download=`${pvNo||currentPhieuNo}.png`;
     link.href=canvas.toDataURL('image/png');
     link.click();
   }catch{
