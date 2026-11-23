@@ -337,6 +337,7 @@ table.pv-tbl td.i{text-align:center;color:#64748b;}
 table.pv-tbl td.nm{padding:5px 4px 5px 2px;text-align:left;}
 table.pv-tbl td.r{text-align:right;white-space:nowrap;font-weight:700;}
 table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
+.fx{white-space:nowrap;font-size:0;}.fx i{display:inline-block;font-style:normal;font-size:11px;width:.62em;text-align:center;}.fx i.p{width:.3em;}.fx i.u{width:.95em;}
 .pv-n{font-size:11px;font-weight:700;color:#111827;line-height:1.25;overflow-wrap:anywhere;}
 .pv-c{font-size:11px;font-weight:700;color:#0284c7;line-height:1.25;overflow-wrap:anywhere;}
 .pv-s{font-size:11px;font-weight:700;color:#b91c1c;line-height:1.25;overflow-wrap:anywhere;}
@@ -537,6 +538,8 @@ function toVN(num, decimals=0){
   if(!num&&num!==0) return '';
   return Number(num).toLocaleString('vi-VN',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
 }
+/* Mỗi ký tự số một ô rộng cố định → dóng thẳng hàng đơn vị/nghìn, không phụ thuộc font hay html2canvas */
+function fx(s){return `<span class="fx">${String(s).split("").map(c=>`<i class="${c==="."||c===","?"p":c==="%"?"u":""}">${c}</i>`).join("")}</span>`;}
 function nowDateStr(){
   const d=new Date();
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -915,10 +918,10 @@ function showPrint(){
     <tr>
       <td class="i">${i+1}</td>
       <td class="nm"><div class="pv-n">${esc(it.hang)}</div>${it.phanloai?`<div class="pv-c">${esc(it.phanloai)}</div>`:''}<div class="pv-s">${esc(it.seller)}</div></td>
-      <td class="r">${toVN(it.sl)}</td>
-      <td class="r">${toVN(it.tc,1)}%</td>
-      <td class="r">${toVN(it.gia)}</td>
-      <td class="r m">${toVN(Math.round(it.sl*(1-it.tc/100)*it.gia))}</td>
+      <td class="r">${fx(toVN(it.sl))}</td>
+      <td class="r">${fx(toVN(it.tc,1)+"%")}</td>
+      <td class="r">${fx(toVN(it.gia))}</td>
+      <td class="r m">${fx(toVN(Math.round(it.sl*(1-it.tc/100)*it.gia)))}</td>
     </tr>`).join('');
 
   document.getElementById('pv-content').innerHTML=`
@@ -941,7 +944,7 @@ function showPrint(){
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="pv-tf"><span class="tl">Tổng:</span><span class="r">${toVN(tongSL)}</span><span class="r m">${toVN(Math.round(tongTien))}</span></div>
+    <div class="pv-tf"><span class="tl">Tổng:</span><span class="r">${fx(toVN(tongSL))}</span><span class="r m">${fx(toVN(Math.round(tongTien)))}</span></div>
     <div class="pv-sign">
       <div><div class="sk">Người bán</div>(Ký, ghi họ tên)</div>
       <div><div class="sk">NV Thu mua</div>(Ký, ghi họ tên)</div>
