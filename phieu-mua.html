@@ -938,8 +938,9 @@ function buildPayload(final=false){
 ══════════════════════════════ */
 async function syncOne(data){
   if(!SB_URL||!SB_KEY) return;
+  let res;
   try{
-    const res=await fetch(`${SB_URL}/rest/v1/phieu_mua_hang`,{
+    res=await fetch(`${SB_URL}/rest/v1/phieu_mua_hang`,{
       method:'POST',
       headers:{
         'apikey':SB_KEY,
@@ -956,6 +957,13 @@ async function syncOne(data){
         created_at: data.created_at
       })
     });
+  }catch(e){
+    // Lỗi tầng mạng của chính lệnh gửi (không phải lỗi xử lý sau khi gửi)
+    showToast('Không gửi được lên Supabase: '+(e&&e.message||e)+' · phiếu đã lưu máy, sẽ gửi lại','error');
+    console.error('syncOne fetch',e);
+    return;
+  }
+  try{
     if(res.ok||res.status===201||res.status===200){
       await idbPut(STORE,{id:data.phieu_no,...data,synced:true});
       showToast(`Đã chốt phiếu ${data.phieu_no}`,'success');
@@ -965,12 +973,13 @@ async function syncOne(data){
       }
     } else {
       const err=await res.text();
-      showToast('Lỗi sync: '+res.status,'error');
+      showToast('Lỗi sync '+res.status+': '+err.slice(0,120),'error');
       console.error(err);
     }
   }catch(e){
-    showToast('Không kết nối được Supabase','error');
-    console.error(e);
+    // Gửi OK nhưng bước xử lý sau đó (lưu máy / làm mới form) lỗi
+    showToast('Đã gửi nhưng lỗi xử lý trên máy: '+(e&&e.message||e),'error');
+    console.error('syncOne after-send',e);
   }
 }
 
