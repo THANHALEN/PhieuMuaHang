@@ -48,6 +48,12 @@ body{
   padding:0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0); /* inset-top do .sbar đảm nhiệm (tránh cộng đôi) */
 }
 
+/* KHUNG ĐIỆN THOẠI trên màn hình rộng (transform làm body thành containing block của mọi phần tử fixed) */
+@media (min-width:600px){
+  html{background:#2b2d31;display:flex;}
+  body{width:412px;max-width:100%;height:min(100dvh,880px);margin:auto;transform:translateZ(0);border-radius:18px;box-shadow:0 0 40px rgba(0,0,0,.5);overflow:hidden;}
+}
+
 /* STATUS BAR */
 .sbar{
   flex-shrink:0;height:env(safe-area-inset-top,0);background:var(--bg);
@@ -314,7 +320,7 @@ body{
 @page{size:A5;margin:8mm;}
 @media print{
   #hist-view,#rec-overlay{display:none!important;}
-  html,body{background:#fff!important;height:auto!important;overflow:visible!important;}
+  html,body{background:#fff!important;height:auto!important;overflow:visible!important;display:block!important;width:auto!important;transform:none!important;box-shadow:none!important;border-radius:0!important;}
   body>*:not(#print-view){display:none!important;}
   #print-view{position:static!important;display:block!important;background:#fff!important;padding:0!important;}
   .pv-hdr,.actions.pv-actions{display:none!important;}
