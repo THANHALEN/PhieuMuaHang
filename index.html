@@ -110,6 +110,12 @@ body{
   font-family:'JetBrains Mono',monospace;font-size:var(--fs-md);font-weight:700;color:var(--accent);
 }
 .phieu-strip .dt{font-size:var(--fs-sm);color:var(--muted);font-weight:600;}
+.dt-pick{position:relative;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:8px;box-shadow:var(--in);}
+.dt-pick svg{width:13px;height:13px;fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.dt-pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.pv-actions.draft{grid-template-columns:repeat(4,1fr);}
+.pv-actions .dr{display:none;font:700 var(--fs-xs)/1.1 'Inter',sans-serif;color:var(--fg);}
+.pv-actions.draft .dr{display:flex;}
 
 /* ZONE */
 .zone{
@@ -312,7 +318,7 @@ body{
 .h-st.draft{background:var(--accent-soft);color:var(--accent);}
 .h-st.wait{background:rgba(200,140,0,.15);color:#a86b00;}
 .h-st.done{background:var(--green-g);color:var(--green);}
-.h-sub{font-size:var(--fs-sm);font-weight:600;color:var(--muted);display:grid;grid-template-columns:11.5ch auto auto;gap:0 10px;justify-content:start;}
+.h-sub{font-size:var(--fs-sm);font-weight:600;color:var(--muted);display:grid;grid-template-columns:11.5ch auto;gap:0 10px;justify-content:start;}
 .h-pl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .h-sum{grid-column:1/3;font-size:var(--fs-sm);font-weight:700;display:flex;justify-content:space-between;}
 .h-cnt{font-size:var(--fs-xs);color:var(--muted);font-weight:600;padding:0 2px;}
@@ -320,7 +326,7 @@ body{
 .hist-btn svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
 @page{size:A5;margin:8mm;}
 @media print{
-  #hist-view,#rec-overlay{display:none!important;}
+  #hist-view{display:none!important;}
   html,body{background:#fff!important;height:auto!important;overflow:visible!important;display:block!important;width:auto!important;transform:none!important;box-shadow:none!important;border-radius:0!important;}
   body>*:not(#print-view){display:none!important;}
   #print-view{position:static!important;display:block!important;background:#fff!important;padding:0!important;}
@@ -406,7 +412,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
     <div class="no" id="phieu-no">PM---------</div>
   </div>
   <div style="display:flex;align-items:center;gap:6px;">
-    <span class="dt" id="phieu-dt">--/--/----</span>
+    <label class="dt dt-pick" title="Bấm để chọn ngày khác"><span id="phieu-dt">--/--/----</span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="11" x2="21" y2="11"/></svg><input type="date" id="phieu-date-in" aria-label="Ngày lập phiếu" onchange="setPhieuDate(this.value)"></label>
     <button class="hist-btn" onclick="openHist()" aria-label="Lịch sử phiếu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Lịch sử</button>
   </div>
 </div>
@@ -537,15 +543,6 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   <div class="h-list" id="h-list"></div>
 </div>
 
-<!-- RECORD ACTION SHEET -->
-<div class="overlay" id="rec-overlay" onclick="closeRec(event)">
-  <div class="sheet">
-    <div class="sheet-title" id="rec-title"></div>
-    <div id="rec-info" style="font-size:var(--fs-sm);font-weight:600;color:var(--muted);margin-bottom:12px;line-height:1.5;"></div>
-    <div class="sheet-btns" id="rec-btns"></div>
-  </div>
-</div>
-
 <!-- PRINT VIEW -->
 <div id="print-view">
   <div class="pv-hdr">
@@ -561,7 +558,9 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   <div class="pv-body">
     <div class="pv-page" id="pv-content"></div>
   </div>
-  <div class="actions pv-actions">
+  <div class="actions pv-actions" id="pv-actions">
+    <button class="act dr" onclick="delRec()">Xoá</button>
+    <button class="act dr" onclick="editRec()">Sửa tiếp</button>
     <button class="act" onclick="downloadPrint()" aria-label="Tải PDF">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
@@ -600,9 +599,25 @@ function toVN(num, decimals=0){
 }
 /* Mỗi ký tự số một ô rộng cố định → dóng thẳng hàng đơn vị/nghìn, không phụ thuộc font hay html2canvas */
 function fx(s){return `<span class="fx">${String(s).split("").map(c=>`<i class="${c==="."||c===","?"p":c==="%"?"u":""}">${c}</i>`).join("")}</span>`;}
-function nowDateStr(){
-  const d=new Date();
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+/* Ngày phiếu: chuỗi YYYY-MM-DD theo giờ máy; chỉ hiển thị ngày, không giờ */
+let phieuDate='';
+function ymdOf(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function todayYmd(){return ymdOf(new Date());}
+function fmtYmd(s){const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:'--';}
+function fmtD(iso){const d=new Date(iso);return isNaN(d)?'--':fmtYmd(ymdOf(d));}
+function setPhieuDate(s){
+  const t=todayYmd();
+  phieuDate=(/^\d{4}-\d{2}-\d{2}$/.test(s)&&s<=t)?s:t;
+  document.getElementById('phieu-dt').textContent=fmtYmd(phieuDate);
+  const inp=document.getElementById('phieu-date-in');
+  inp.max=t; inp.value=phieuDate;
+}
+/* created_at = ngày phiếu + giờ hiện tại (hôm nay → đúng thời điểm lưu) */
+function phieuCreatedAt(){
+  if(!phieuDate||phieuDate===todayYmd()) return new Date().toISOString();
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  const d=new Date(`${phieuDate}T${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`);
+  return isNaN(d)?n.toISOString():d.toISOString();
 }
 function yyyymmdd(d=new Date()){
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
@@ -883,7 +898,7 @@ async function initPhieu(){
   currentPhieuNo=await peekPhieuNo();
   phieuCommitted=false;
   document.getElementById('phieu-no').textContent=currentPhieuNo;
-  document.getElementById('phieu-dt').textContent=nowDateStr();
+  setPhieuDate(todayYmd());
 }
 
 /* ══════════════════════════════
@@ -937,7 +952,7 @@ function buildPayload(final=false){
     nv_thu_mua: NV_NAME,
     items: items.map(it=>({...it})),
     tong_sl: items.reduce((s,it)=>s+it.sl,0),
-    created_at: new Date().toISOString(),
+    created_at: phieuCreatedAt(),
     final
   };
 }
@@ -1091,7 +1106,7 @@ function renderHist(){
     const st=recStatus(r),t=recTotals(r);
     return `<button class="h-row" data-id="${esc(r.id)}" onclick="openRec(this.dataset.id)">
       <span class="h-no">${esc(r.phieu_no||r.id)}</span><span class="h-st ${st}">${ST_LBL[st]}</span>
-      <span class="h-sub"><span class="h-pl">${esc(r.bien_so||'(chưa có biển số)')}</span>${fmtDT(r.created_at).split(' · ').map(x=>`<span>${x}</span>`).join('')}</span><span></span>
+      <span class="h-sub"><span class="h-pl">${esc(r.bien_so||'(chưa có biển số)')}</span><span>${fmtD(r.created_at)}</span></span><span></span>
       <span class="h-sum"><span>${r.items.length} dòng · ${toVN(t.sl)} kg</span><span>${toVN(t.tien)} đ</span></span>
     </button>`;
   }).join('');
@@ -1099,21 +1114,6 @@ function renderHist(){
 function openRec(id){
   const r=histAll.find(x=>String(x.id)===String(id)); if(!r) return;
   recCur=r;
-  const st=recStatus(r),t=recTotals(r);
-  document.getElementById('rec-title').textContent=r.phieu_no||r.id;
-  document.getElementById('rec-info').innerHTML=`${ST_LBL[st]} · ${fmtDT(r.created_at)}<br>Biển số: <b>${esc(r.bien_so||'---')}</b> · ${r.items.length} dòng · ${toVN(t.sl)} kg · ${toVN(t.tien)} đ`;
-  document.getElementById('rec-btns').innerHTML=st==='draft'
-    ? '<button class="s-btn" onclick="viewRec()">Xem / In</button><button class="s-btn ok" onclick="editRec()">Tiếp tục sửa</button><button class="s-btn" style="grid-column:1/3" onclick="delRec()">Xoá bản tạm</button>'
-    : '<button class="s-btn" onclick="closeRec()">Đóng</button><button class="s-btn ok" onclick="viewRec()">Xem / In</button>';
-  document.getElementById('rec-overlay').classList.add('show');
-}
-function closeRec(e){
-  if(e&&e.target!==document.getElementById('rec-overlay')) return;
-  document.getElementById('rec-overlay').classList.remove('show');
-}
-function viewRec(){
-  const r=recCur; if(!r) return;
-  document.getElementById('rec-overlay').classList.remove('show');
   showPrint(r);
 }
 function editRec(){
@@ -1124,9 +1124,10 @@ function editRec(){
   items=r.items.map(i=>({...i}));
   document.getElementById('bien-so').value=r.bien_so||'';
   document.getElementById('phieu-no').textContent=currentPhieuNo;
-  document.getElementById('phieu-dt').textContent=fmtDT(r.created_at);
+  const dd=new Date(r.created_at);
+  setPhieuDate(isNaN(dd)?todayYmd():ymdOf(dd));
   renderItems();
-  document.getElementById('rec-overlay').classList.remove('show');
+  hidePrint();
   closeHist();
   showToast('Đã mở '+currentPhieuNo+' để sửa');
 }
@@ -1135,7 +1136,7 @@ async function delRec(){
   if(!confirm('Xoá bản tạm '+(r.phieu_no||r.id)+'? Không khôi phục được.')) return;
   try{await idbDelete(STORE,r.id);}catch(e){console.error(e);showToast('Không xoá được','error');return;}
   histAll=histAll.filter(x=>x.id!==r.id);
-  document.getElementById('rec-overlay').classList.remove('show');
+  hidePrint();
   renderHist();
   showToast('Đã xoá bản tạm');
 }
@@ -1146,12 +1147,13 @@ async function delRec(){
 let pvNo='';
 function showPrint(rec){
   let list,bienSo,no,dt;
-  if(rec){list=rec.items;bienSo=rec.bien_so||'---';no=rec.phieu_no||rec.id;dt=fmtDT(rec.created_at);}
+  document.getElementById('pv-actions').classList.toggle('draft',!!rec&&recStatus(rec)==='draft');
+  if(rec){list=rec.items;bienSo=rec.bien_so||'---';no=rec.phieu_no||rec.id;dt=fmtD(rec.created_at);}
   else{
     if(!items.length){showToast('Chưa có hàng hóa để in','error');return;}
     const bsEl=document.getElementById('bien-so');
     bsEl.value=fmtPlate(bsEl.value);
-    list=items;bienSo=bsEl.value.trim()||'---';no=currentPhieuNo;dt=nowDateStr();
+    list=items;bienSo=bsEl.value.trim()||'---';no=currentPhieuNo;dt=fmtYmd(phieuDate);
   }
   pvNo=no;
   const tongSL=list.reduce((s,it)=>s+it.sl,0);
