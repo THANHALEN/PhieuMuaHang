@@ -412,7 +412,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
     <div class="no" id="phieu-no">PM---------</div>
   </div>
   <div style="display:flex;align-items:center;gap:6px;">
-    <label class="dt dt-pick" title="Bấm để chọn ngày khác"><span id="phieu-dt">--/--/----</span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="11" x2="21" y2="11"/></svg><input type="date" id="phieu-date-in" aria-label="Ngày lập phiếu" onchange="setPhieuDate(this.value)"></label>
+    <label class="dt dt-pick" title="Bấm để chọn ngày khác"><span id="phieu-dt">--/--/----</span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="11" x2="21" y2="11"/></svg><input type="date" id="phieu-date-in" aria-label="Ngày lập phiếu" onchange="changePhieuDate(this.value)"></label>
     <button class="hist-btn" onclick="openHist()" aria-label="Lịch sử phiếu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Lịch sử</button>
   </div>
 </div>
@@ -612,6 +612,28 @@ function setPhieuDate(s){
   const inp=document.getElementById('phieu-date-in');
   inp.max=t; inp.value=phieuDate;
   if(!phieuCommitted) refreshPhieuNo(); // phiếu chưa cấp số thật: số xem trước đổi theo ngày chọn
+}
+/* Người dùng đổi ngày: phiếu đã có số thật → cấp số mới theo ngày mới, chuyển bản tạm sang số mới, xoá bản cũ */
+async function changePhieuDate(s){
+  const old=phieuDate;
+  setPhieuDate(s);
+  if(!phieuCommitted||phieuDate===old||currentPhieuNo.includes(phieuDate.replace(/-/g,''))) return;
+  const oldNo=currentPhieuNo;
+  try{
+    const newNo=await nextPhieuNo(phieuDate);
+    const rec=await idbGet(STORE,oldNo);
+    if(rec){
+      await idbPut(STORE,{...rec,id:newNo,phieu_no:newNo,created_at:phieuCreatedAt()});
+      await idbDelete(STORE,oldNo);
+    }
+    currentPhieuNo=newNo;
+    document.getElementById('phieu-no').textContent=newNo;
+    showToast(`Đã đổi số phiếu: ${oldNo} → ${newNo}`);
+  }catch(e){
+    console.error('changePhieuDate',e);
+    setPhieuDate(old);
+    showToast('Không đổi được ngày/số phiếu: '+(e&&e.message||e),'error');
+  }
 }
 async function refreshPhieuNo(){
   const d=phieuDate;
