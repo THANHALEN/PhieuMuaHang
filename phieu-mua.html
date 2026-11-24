@@ -611,6 +611,14 @@ function setPhieuDate(s){
   document.getElementById('phieu-dt').textContent=fmtYmd(phieuDate);
   const inp=document.getElementById('phieu-date-in');
   inp.max=t; inp.value=phieuDate;
+  if(!phieuCommitted) refreshPhieuNo(); // phiếu chưa cấp số thật: số xem trước đổi theo ngày chọn
+}
+async function refreshPhieuNo(){
+  const d=phieuDate;
+  try{
+    const n=await peekPhieuNo(d);
+    if(d===phieuDate&&!phieuCommitted){currentPhieuNo=n;document.getElementById('phieu-no').textContent=n;}
+  }catch(e){console.error('refreshPhieuNo',e);}
 }
 /* created_at = ngày phiếu + giờ hiện tại (hôm nay → đúng thời điểm lưu) */
 function phieuCreatedAt(){
@@ -618,9 +626,6 @@ function phieuCreatedAt(){
   const n=new Date(),p=x=>String(x).padStart(2,'0');
   const d=new Date(`${phieuDate}T${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`);
   return isNaN(d)?n.toISOString():d.toISOString();
-}
-function yyyymmdd(d=new Date()){
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 }
 
 /* ══════════════════════════════
@@ -691,21 +696,21 @@ async function idbGetAll(store){
 
 /* ══════════════════════════════
    PHIEU NUMBER GENERATOR
-   PM-YYYYMMDD-NNNN (sequential per year)
+   PM-YYYYMMDD-NNNN (ngày = ngày phiếu; số thứ tự tăng theo năm của ngày đó)
 ══════════════════════════════ */
 /* Xem trước số kế tiếp, KHÔNG tăng bộ đếm (mở app không tiêu số) */
-async function peekPhieuNo(){
-  const rec=await idbGet('counter','counter_'+new Date().getFullYear())||{val:0};
-  return `PM-${yyyymmdd()}-${String(rec.val+1).padStart(4,'0')}`;
+/* Phần ngày trong số phiếu theo NGÀY PHIẾU đã chọn (ymd = YYYY-MM-DD); bộ đếm tính theo năm của ngày đó */
+async function peekPhieuNo(ymd){
+  const rec=await idbGet('counter','counter_'+ymd.slice(0,4))||{val:0};
+  return `PM-${ymd.replace(/-/g,'')}-${String(rec.val+1).padStart(4,'0')}`;
 }
-async function nextPhieuNo(){
-  const year=new Date().getFullYear();
-  const key='counter_'+year;
+async function nextPhieuNo(ymd){
+  const key='counter_'+ymd.slice(0,4);
   const rec=await idbGet('counter',key)||{key,val:0};
   rec.val+=1;
   await idbPut('counter',rec);
   const seq=String(rec.val).padStart(4,'0');
-  return `PM-${yyyymmdd()}-${seq}`;
+  return `PM-${ymd.replace(/-/g,'')}-${seq}`;
 }
 
 /* ══════════════════════════════
@@ -895,10 +900,9 @@ function updateItem(i,field,val){
    INIT PHIEU
 ══════════════════════════════ */
 async function initPhieu(){
-  currentPhieuNo=await peekPhieuNo();
   phieuCommitted=false;
-  document.getElementById('phieu-no').textContent=currentPhieuNo;
   setPhieuDate(todayYmd());
+  await refreshPhieuNo();
 }
 
 /* ══════════════════════════════
@@ -907,7 +911,7 @@ async function initPhieu(){
 /* Lần lưu đầu tiên của phiếu mới: cấp số thật (tăng bộ đếm) */
 async function ensurePhieuNo(){
   if(phieuCommitted) return;
-  currentPhieuNo=await nextPhieuNo();
+  currentPhieuNo=await nextPhieuNo(phieuDate||todayYmd());
   phieuCommitted=true;
   document.getElementById('phieu-no').textContent=currentPhieuNo;
 }
