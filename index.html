@@ -417,7 +417,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       <div class="hm-st full"><small>Thành tiền (đ)</small><b id="hm-tien">0</b></div>
     </div>
     <button class="hm-wait" id="hm-wait" hidden onclick="goWait()"></button>
-    <button class="hm-cta" id="hm-cta" onclick="showComposer()">+ Lập phiếu mới</button>
+    <button class="hm-cta" id="hm-cta" onclick="showComposer()">Tạo phiếu mới</button>
     <div class="sec-lbl">Bản tạm &amp; phiếu hôm nay</div>
     <div class="hm-list" id="hm-list"></div>
   </div>
@@ -1170,7 +1170,6 @@ function go(tab){
 }
 function showComposer(){document.getElementById('composer').classList.add('show');}
 function hideComposer(){document.getElementById('composer').classList.remove('show');go('home');}
-function formDirty(){return items.length>0||document.getElementById('bien-so').value.trim()!=='';}
 function renderCurrent(){if(curTab==='home') renderHome(); else if(curTab==='hist') renderHist();}
 function goWait(){histTab='wait';go('hist');setHistTab('wait');}
 async function loadHome(){
@@ -1194,7 +1193,6 @@ function renderHome(){
   const nWait=histAll.filter(r=>recStatus(r)==='wait').length;
   const w=document.getElementById('hm-wait');
   w.hidden=!nWait; w.textContent=nWait?(nWait+' phiếu chờ sync · bấm để xem'):'';
-  document.getElementById('hm-cta').textContent=formDirty()?'Tiếp tục phiếu đang nhập':'+ Lập phiếu mới';
   const rows=[...drafts,...todayRows];
   document.getElementById('hm-list').innerHTML=rows.length?rows.map(rowHtml).join(''):'<div class="hm-empty">Chưa có phiếu nào hôm nay</div>';
 }
