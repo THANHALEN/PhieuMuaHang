@@ -85,7 +85,7 @@ body{
 
 /* TOAST */
 .toast{
-  position:fixed;top:0;left:0;right:0;z-index:100;
+  position:fixed;top:0;left:0;right:0;z-index:300;
   padding:10px 16px;
   font-size:var(--fs-sm);font-weight:700;color:#fff;
   display:flex;align-items:center;gap:8px;
@@ -283,15 +283,7 @@ body{
 .s-btn.ok{background:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-g);}
 .s-btn:active{transform:scale(.97);}
 
-/* ── SETTINGS OVERLAY ── */
-.settings-sheet{
-  width:100%;background:var(--bg);
-  border-radius:20px 20px 0 0;
-  padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));
-  transform:translateY(100%);transition:transform .3s ease;
-  box-shadow:0 -8px 30px rgba(0,0,0,.2);
-}
-.overlay.open .settings-sheet{transform:translateY(0);}
+/* ── SETTINGS PAGE ── */
 .settings-item{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
 
 /* ── PRINT PREVIEW ── */
@@ -304,8 +296,29 @@ body{
 }
 #print-view.show{display:flex;}
 /* ── HISTORY ── */
-#hist-view{display:none;position:fixed;inset:0;z-index:150;background:var(--bg);flex-direction:column;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0);}
-#hist-view.show{display:flex;}
+/* ── TAB PAGES + TABBAR + HOME + COMPOSER ── */
+.tab-page{display:none;flex:1;min-height:0;flex-direction:column;}
+.tab-page.on{display:flex;}
+.tabbar{flex-shrink:0;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--bg);border-radius:20px 20px 0 0;box-shadow:0 -5px 14px var(--sh-d);padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));z-index:10;}
+.tab{border:none;background:none;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font:700 11px/1 'Inter',sans-serif;cursor:pointer;border-radius:12px;}
+.tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.tab.on{color:var(--accent);}
+#composer{display:none;position:fixed;inset:0;z-index:120;background:var(--bg);flex-direction:column;padding:0 env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0);}
+#composer.show{display:flex;}
+.home-body,.set-body{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;}
+.hm-hello{font-size:var(--fs-sm);font-weight:700;color:var(--muted);}
+.hm-card{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;border-radius:var(--r);box-shadow:var(--up-sm);flex-shrink:0;}
+.hm-st{display:flex;flex-direction:column;gap:3px;}
+.hm-st.full{grid-column:1/3;}
+.hm-st small{font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.hm-st b{font:700 18px/1.1 'JetBrains Mono',monospace;color:var(--fg);}
+.hm-wait{flex-shrink:0;border:none;border-radius:10px;padding:9px 12px;background:rgba(200,140,0,.15);color:#a86b00;font:800 var(--fs-sm)/1.2 'Inter',sans-serif;text-align:left;cursor:pointer;}
+.hm-cta{flex-shrink:0;height:52px;border:none;border-radius:var(--r);background:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-g);font:800 15px/1 'Inter',sans-serif;cursor:pointer;}
+.hm-cta:active{transform:scale(.98);}
+.hm-list{display:flex;flex-direction:column;gap:8px;}
+.hm-empty{font-size:var(--fs-sm);font-weight:600;color:var(--muted);text-align:center;padding:18px 0;}
+.al{font:700 10px/1 'Inter',sans-serif;color:var(--muted);}
+.act.primary .al{color:#fff;}
 .h-tools{flex-shrink:0;padding:8px 14px 6px;display:flex;flex-direction:column;gap:8px;}
 .h-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
 .h-tab{border:none;border-radius:10px;padding:7px 2px;background:var(--bg);box-shadow:var(--up-sm);font:700 var(--fs-xs)/1.1 'Inter',sans-serif;color:var(--muted);cursor:pointer;}
@@ -322,11 +335,8 @@ body{
 .h-pl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .h-sum{grid-column:1/3;font-size:var(--fs-sm);font-weight:700;display:flex;justify-content:space-between;}
 .h-cnt{font-size:var(--fs-xs);color:var(--muted);font-weight:600;padding:0 2px;}
-.hist-btn{display:flex;align-items:center;gap:4px;border:none;background:none;color:var(--accent);font:800 var(--fs-sm)/1 'Inter',sans-serif;padding:4px 6px;cursor:pointer;}
-.hist-btn svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
 @page{size:A5;margin:8mm;}
 @media print{
-  #hist-view{display:none!important;}
   html,body{background:#fff!important;height:auto!important;overflow:visible!important;display:block!important;width:auto!important;transform:none!important;box-shadow:none!important;border-radius:0!important;}
   body>*:not(#print-view){display:none!important;}
   #print-view{position:static!important;display:block!important;background:#fff!important;padding:0!important;}
@@ -392,19 +402,86 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   <span id="toast-msg"></span>
 </div>
 
-<!-- HEADER -->
+<!-- TABS -->
 <div class="sbar"></div>
-<div class="hdr">
-  <div id="status-pill" class="pill offline" title="Đang kiểm tra kết nối database...">● v…</div>
-  <div class="hdr-mid">
-    <span class="co">Vina InterStarch</span>
-    <h1>Phiếu Mua Hàng</h1>
+<div class="tab-page on" id="tab-home">
+  <div class="hdr">
+    <div id="status-pill" class="pill offline" title="Đang kiểm tra kết nối database...">● v…</div>
+    <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Phiếu Mua Hàng</h1></div>
+    <span class="pv-hdr-sp"></span>
   </div>
-  <button class="icon-btn" onclick="openSettings()" aria-label="Cài đặt">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-  </button>
+  <div class="home-body">
+    <div class="hm-hello" id="hm-nv"></div>
+    <div class="hm-card">
+      <div class="hm-st"><small>Phiếu hôm nay</small><b id="hm-n">0</b></div>
+      <div class="hm-st"><small>Khối lượng (kg)</small><b id="hm-sl">0</b></div>
+      <div class="hm-st full"><small>Thành tiền (đ)</small><b id="hm-tien">0</b></div>
+    </div>
+    <button class="hm-wait" id="hm-wait" hidden onclick="goWait()"></button>
+    <button class="hm-cta" id="hm-cta" onclick="showComposer()">+ Lập phiếu mới</button>
+    <div class="sec-lbl">Bản tạm &amp; phiếu hôm nay</div>
+    <div class="hm-list" id="hm-list"></div>
+  </div>
+</div>
+<!-- HISTORY VIEW -->
+<div class="tab-page" id="tab-hist">
+  <div class="pv-hdr">
+    <span class="pv-hdr-sp"></span>
+    <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Lịch sử phiếu</h1></div>
+    <span class="pv-hdr-sp"></span>
+  </div>
+  <div class="h-tools">
+    <input class="nm-in" id="h-q" type="search" placeholder="Tìm số phiếu, biển số, hàng, người bán..." autocomplete="off" oninput="renderHist()">
+    <div class="h-tabs" id="h-tabs">
+      <button class="h-tab on" data-t="all" onclick="setHistTab('all')">Tất cả</button>
+      <button class="h-tab" data-t="draft" onclick="setHistTab('draft')">Tạm lưu</button>
+      <button class="h-tab" data-t="wait" onclick="setHistTab('wait')">Chờ sync</button>
+      <button class="h-tab" data-t="done" onclick="setHistTab('done');refreshHist()">Đã chốt</button>
+    </div>
+    <div class="h-cnt" id="h-cnt"></div>
+  </div>
+  <div class="h-list" id="h-list"></div>
 </div>
 
+<div class="tab-page" id="tab-settings">
+  <div class="pv-hdr">
+    <span class="pv-hdr-sp"></span>
+    <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Cài đặt</h1></div>
+    <span class="pv-hdr-sp"></span>
+  </div>
+  <div class="set-body">
+    <div class="settings-item">
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Nhân viên thu mua</label>
+      <input class="s-in" id="nv-name" placeholder="Tên nhân viên..." autocomplete="off">
+    </div>
+    <div class="settings-item">
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase URL</label>
+      <input class="s-in" id="sb-url" placeholder="https://xxx.supabase.co" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="settings-item">
+      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase Anon Key</label>
+      <input class="s-in" id="sb-key" placeholder="eyJhbG..." autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div style="margin-top:4px;">
+      <button class="s-btn" style="width:100%;margin-bottom:8px;" onclick="copySetupLink()">Sao chép link cài nhanh</button>
+      <button class="s-btn ok" style="width:100%;" onclick="saveSettings()">Lưu cài đặt</button>
+    </div>
+  </div>
+</div>
+<nav class="tabbar" id="tabbar">
+  <button class="tab on" data-tab="home" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Hôm nay</span></button>
+  <button class="tab" data-tab="hist" onclick="go('hist')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span>Lịch sử</span></button>
+  <button class="tab" data-tab="settings" onclick="go('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg><span>Cài đặt</span></button>
+</nav>
+
+<!-- COMPOSER (luồng lập phiếu, toàn khung) -->
+<div id="composer">
+<div class="sbar"></div>
+<div class="hdr">
+  <button class="icon-btn" onclick="hideComposer()" aria-label="Quay lại"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+  <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Lập phiếu</h1></div>
+  <span class="pv-hdr-sp"></span>
+</div>
 <!-- PHIEU STRIP -->
 <div class="phieu-strip">
   <div>
@@ -413,7 +490,6 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   </div>
   <div style="display:flex;align-items:center;gap:6px;">
     <label class="dt dt-pick" title="Bấm để chọn ngày khác"><span id="phieu-dt">--/--/----</span><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="11" x2="21" y2="11"/></svg><input type="date" id="phieu-date-in" aria-label="Ngày lập phiếu" onchange="changePhieuDate(this.value)"></label>
-    <button class="hist-btn" onclick="openHist()" aria-label="Lịch sử phiếu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Lịch sử</button>
   </div>
 </div>
 
@@ -454,14 +530,18 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
 <div class="actions">
   <button class="act" onclick="saveDraft()" aria-label="Lưu tạm">
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+  <span class="al">Lưu tạm</span>
   </button>
   <button class="act primary" onclick="chot()" aria-label="Chốt phiếu">
     <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span class="al">Chốt</span>
   </button>
   <button class="act sec" onclick="showPrint()" aria-label="In phiếu">
     <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  <span class="al">In</span>
   </button>
 </div>
+
 
 <!-- ADD ITEM OVERLAY -->
 <div class="overlay" id="add-overlay" onclick="closeAdd(event)">
@@ -500,47 +580,6 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
   </div>
 </div>
 
-<!-- SETTINGS OVERLAY -->
-<div class="overlay" id="settings-overlay" onclick="closeSettings(event)">
-  <div class="settings-sheet">
-    <div class="sheet-title">Cài đặt</div>
-    <div class="settings-item">
-      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Nhân viên thu mua</label>
-      <input class="s-in" id="nv-name" placeholder="Tên nhân viên..." autocomplete="off">
-    </div>
-    <div class="settings-item">
-      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase URL</label>
-      <input class="s-in" id="sb-url" placeholder="https://xxx.supabase.co" autocomplete="off" autocorrect="off" spellcheck="false">
-    </div>
-    <div class="settings-item">
-      <label style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Supabase Anon Key</label>
-      <input class="s-in" id="sb-key" placeholder="eyJhbG..." autocomplete="off" autocorrect="off" spellcheck="false">
-    </div>
-    <div style="margin-top:4px;">
-      <button class="s-btn" style="width:100%;margin-bottom:8px;" onclick="copySetupLink()">Sao chép link cài nhanh</button>
-      <button class="s-btn ok" style="width:100%;" onclick="saveSettings()">Lưu cài đặt</button>
-    </div>
-  </div>
-</div>
-
-<!-- HISTORY VIEW -->
-<div id="hist-view">
-  <div class="pv-hdr">
-    <span class="pv-hdr-sp"></span>
-    <div class="hdr-mid"><span class="co">Vina InterStarch</span><h1>Lịch sử phiếu</h1></div>
-    <button class="icon-btn" onclick="closeHist()" aria-label="Đóng"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  </div>
-  <div class="h-tools">
-    <input class="nm-in" id="h-q" type="search" placeholder="Tìm số phiếu, biển số, hàng, người bán..." autocomplete="off" oninput="renderHist()">
-    <div class="h-tabs" id="h-tabs">
-      <button class="h-tab on" data-t="all" onclick="setHistTab('all')">Tất cả</button>
-      <button class="h-tab" data-t="draft" onclick="setHistTab('draft')">Tạm lưu</button>
-      <button class="h-tab" data-t="wait" onclick="setHistTab('wait')">Chờ sync</button>
-      <button class="h-tab" data-t="done" onclick="setHistTab('done');refreshHist()">Đã chốt</button>
-    </div>
-    <div class="h-cnt" id="h-cnt"></div>
-  </div>
-  <div class="h-list" id="h-list"></div>
 </div>
 
 <!-- PRINT VIEW -->
@@ -780,7 +819,6 @@ function saveSettings(){
   localStorage.setItem('nv_name',NV_NAME);
   localStorage.setItem('sb_url',SB_URL);
   localStorage.setItem('sb_key',SB_KEY);
-  closeSettings();
   showToast('Đã lưu cài đặt');
   checkDb();
 }
@@ -788,11 +826,6 @@ function openSettings(){
   document.getElementById('nv-name').value=NV_NAME;
   document.getElementById('sb-url').value=SB_URL;
   document.getElementById('sb-key').value=SB_KEY;
-  document.getElementById('settings-overlay').classList.add('open');
-}
-function closeSettings(e){
-  if(!e||e.target===document.getElementById('settings-overlay'))
-    document.getElementById('settings-overlay').classList.remove('open');
 }
 
 /* ══════════════════════════════
@@ -1044,7 +1077,7 @@ async function syncPending(){
    LỊCH SỬ PHIẾU (IndexedDB cục bộ)
    draft = Tạm lưu; wait = đã chốt, chưa sync; done = đã chốt + đã sync
 ══════════════════════════════ */
-let histTab='all', histAll=[], recCur=null;
+let histTab='all', histAll=[], recCur=null, curTab='home';
 function fmtDT(iso){
   const d=new Date(iso); if(isNaN(d)) return '--';
   const p=n=>String(n).padStart(2,'0');
@@ -1121,16 +1154,51 @@ async function refreshHist(){
   histSrc='Đang đồng bộ Supabase...';renderHist();
   await pullRemote();
   try{await loadHistLocal();}catch(e){console.error(e);}
-  if(document.getElementById('hist-view').classList.contains('show')) renderHist();
+  if(curTab==='hist') renderHist();
+}
+/* ── ĐIỀU HƯỚNG: 3 tab (Hôm nay · Lịch sử · Cài đặt) + màn Lập phiếu toàn khung ── */
+function go(tab){
+  curTab=tab;
+  ['home','hist','settings'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
+  document.querySelectorAll('#tabbar .tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  if(tab==='home') loadHome(); else if(tab==='hist') openHist(); else openSettings();
+}
+function showComposer(){document.getElementById('composer').classList.add('show');}
+function hideComposer(){document.getElementById('composer').classList.remove('show');go('home');}
+function formDirty(){return items.length>0||document.getElementById('bien-so').value.trim()!=='';}
+function renderCurrent(){if(curTab==='home') renderHome(); else if(curTab==='hist') renderHist();}
+function goWait(){histTab='wait';go('hist');setHistTab('wait');}
+async function loadHome(){
+  try{await loadHistLocal();}catch(e){console.error(e);}
+  renderHome();
+  await pullRemote();
+  if(curTab!=='home') return;
+  try{await loadHistLocal();}catch(e){console.error(e);}
+  renderHome();
+}
+function renderHome(){
+  const today=todayYmd();
+  const isToday=r=>{const d=new Date(r.created_at);return !isNaN(d)&&ymdOf(d)===today;};
+  const drafts=histAll.filter(r=>recStatus(r)==='draft');
+  const todayRows=histAll.filter(r=>recStatus(r)!=='draft'&&isToday(r));
+  const tt=todayRows.reduce((a,r)=>{const t=recTotals(r);a.sl+=t.sl;a.tien+=t.tien;return a;},{sl:0,tien:0});
+  document.getElementById('hm-nv').textContent=NV_NAME?('NV thu mua: '+NV_NAME):'Chưa đặt tên nhân viên (vào Cài đặt)';
+  document.getElementById('hm-n').textContent=todayRows.length;
+  document.getElementById('hm-sl').textContent=toVN(tt.sl);
+  document.getElementById('hm-tien').textContent=toVN(tt.tien);
+  const nWait=histAll.filter(r=>recStatus(r)==='wait').length;
+  const w=document.getElementById('hm-wait');
+  w.hidden=!nWait; w.textContent=nWait?(nWait+' phiếu chờ sync · bấm để xem'):'';
+  document.getElementById('hm-cta').textContent=formDirty()?'Tiếp tục phiếu đang nhập':'+ Lập phiếu mới';
+  const rows=[...drafts,...todayRows];
+  document.getElementById('hm-list').innerHTML=rows.length?rows.map(rowHtml).join(''):'<div class="hm-empty">Chưa có phiếu nào hôm nay</div>';
 }
 async function openHist(){
   try{await loadHistLocal();}
   catch(e){console.error(e);showToast('Không đọc được lịch sử','error');return;}
-  document.getElementById('hist-view').classList.add('show');
   renderHist();
   refreshHist();
 }
-function closeHist(){document.getElementById('hist-view').classList.remove('show');}
 function setHistTab(t){
   histTab=t;
   document.querySelectorAll('#h-tabs .h-tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
@@ -1147,14 +1215,15 @@ function renderHist(){
   document.getElementById('h-cnt').textContent=`${rows.length} / ${histAll.length} phiếu`+(histSrc?` · ${histSrc}`:'');
   const list=document.getElementById('h-list');
   if(!rows.length){list.innerHTML='<div class="empty-state" style="padding:40px 0"><p>Không có phiếu nào</p></div>';return;}
-  list.innerHTML=rows.map(r=>{
+  list.innerHTML=rows.map(rowHtml).join('');
+}
+function rowHtml(r){
     const st=recStatus(r),t=recTotals(r);
     return `<button class="h-row" data-id="${esc(r.id)}" onclick="openRec(this.dataset.id)">
       <span class="h-no">${esc(r.phieu_no||r.id)}</span><span class="h-st ${st}">${ST_LBL[st]}</span>
       <span class="h-sub"><span class="h-pl">${esc(r.bien_so||'(chưa có biển số)')}</span><span>${fmtD(r.created_at)}</span></span><span></span>
       <span class="h-sum"><span>${r.items.length} dòng · ${toVN(t.sl)} kg</span><span>${toVN(t.tien)} đ</span></span>
     </button>`;
-  }).join('');
 }
 function openRec(id){
   const r=histAll.find(x=>String(x.id)===String(id)); if(!r) return;
@@ -1173,7 +1242,7 @@ function editRec(){
   setPhieuDate(isNaN(dd)?todayYmd():ymdOf(dd));
   renderItems();
   hidePrint();
-  closeHist();
+  showComposer();
   showToast('Đã mở '+currentPhieuNo+' để sửa');
 }
 async function delRec(){
@@ -1182,7 +1251,7 @@ async function delRec(){
   try{await idbDelete(STORE,r.id);}catch(e){console.error(e);showToast('Không xoá được','error');return;}
   histAll=histAll.filter(x=>x.id!==r.id);
   hidePrint();
-  renderHist();
+  renderCurrent();
   showToast('Đã xoá bản tạm');
 }
 
@@ -1358,7 +1427,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkDb(
   renderItems();
 
   // Nếu chưa có settings → mở settings
-  if(!SB_URL||!SB_KEY) openSettings();
+  go(!SB_URL||!SB_KEY?'settings':'home');
 
 })();
 </script>
