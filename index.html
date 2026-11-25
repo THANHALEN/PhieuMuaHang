@@ -413,7 +413,7 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
       <div class="hm-st full"><small>Thành tiền (đ)</small><b id="hm-tien">0</b></div>
     </div>
     <button class="hm-wait" id="hm-wait" hidden onclick="goWait()"></button>
-    <button class="hm-cta" id="hm-cta" onclick="showComposer()">Tạo phiếu mới</button>
+    <button class="hm-cta" id="hm-cta" onclick="newPhieu()">Tạo phiếu mới</button>
     <div class="sec-lbl">Bản tạm &amp; phiếu hôm nay</div>
     <div class="hm-list" id="hm-list"></div>
   </div>
@@ -1163,6 +1163,21 @@ function go(tab){
   ['home','hist','settings'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('on',t===tab));
   document.querySelectorAll('#tabbar .tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   if(tab==='home') loadHome(); else if(tab==='hist') openHist(); else openSettings();
+}
+/* Tạo phiếu mới: phiếu đang nhập dở (có biển số/hàng) tự lưu thành bản tạm, rồi mở form trống */
+let creating=false;
+function formDirty(){return items.length>0||document.getElementById('bien-so').value.trim()!=='';}
+async function newPhieu(){
+  if(creating) return;
+  creating=true;
+  try{
+    if(formDirty()) await saveDraft();
+    await resetForm();
+    showComposer();
+  }catch(e){
+    console.error('newPhieu',e);
+    showToast('Không tạo được phiếu mới: '+(e&&e.message||e),'error');
+  }finally{creating=false;}
 }
 function showComposer(){document.getElementById('composer').classList.add('show');}
 function hideComposer(){document.getElementById('composer').classList.remove('show');go('home');}
