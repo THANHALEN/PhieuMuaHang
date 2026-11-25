@@ -1060,7 +1060,26 @@ function normTxt(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036
 let histSrc='';
 async function loadHistLocal(){
   histAll=(await idbGetAll(STORE)).filter(r=>r&&Array.isArray(r.items));
-  histAll.sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+  // Nhóm theo NGÀY phiếu (mới → cũ), trong ngày theo số phiếu giảm dần: phiếu bổ sung cho ngày cũ nằm đúng nhóm ngày
+  const dayOf=r=>{const d=new Date(r.created_at);return isNaN(d)?'':ymdOf(d);};
+  histAll.sort((a,b)=>dayOf(b).localeCompare(dayOf(a))||String(b.phieu_no||b.id).localeCompare(String(a.phieu_no||a.id)));
+  await bumpCounters(histAll);
+}
+/* Nâng bộ đếm theo số lớn nhất đã có (kể cả từ Supabase) để máy mới/mất dữ liệu không cấp trùng số. Không bao giờ hạ bộ đếm. */
+async function bumpCounters(rows){
+  try{
+    const mx={};
+    for(const r of rows){
+      const m=/^PM-(\d{4})\d{4}-(\d+)$/.exec(String(r.phieu_no||r.id||''));
+      if(m&&(+m[2])>(mx[m[1]]||0)) mx[m[1]]=+m[2];
+    }
+    for(const y of Object.keys(mx)){
+      const key='counter_'+y;
+      const rec=await idbGet('counter',key)||{key,val:0};
+      if(rec.val<mx[y]){rec.val=mx[y];await idbPut('counter',rec);}
+    }
+    if(!phieuCommitted) await refreshPhieuNo();
+  }catch(e){console.error('bumpCounters',e);}
 }
 /* Kéo danh sách phiếu đã chốt từ Supabase về kho máy (Supabase là nguồn đúng cho phiếu đã chốt).
    - Phiếu có trên server → ghi đè bản máy thành final+synced (trừ khi máy đang có BẢN TẠM cùng số: giữ bản tạm).
