@@ -113,8 +113,9 @@ body{
 .dt-pick{position:relative;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 8px;border-radius:8px;box-shadow:var(--in);}
 .dt-pick svg{width:13px;height:13px;fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
 .dt-pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
-.pv-actions.draft{grid-template-columns:repeat(4,1fr);}
-.pv-actions .dr{display:none;font:700 var(--fs-xs)/1.1 'Inter',sans-serif;color:var(--fg);}
+#composer .actions{grid-template-columns:1fr 1.6fr;}
+.actions.pv-actions.draft{grid-template-columns:repeat(4,1fr);}
+.pv-actions .dr{display:none;}
 .pv-actions.draft .dr{display:flex;}
 
 /* ZONE */
@@ -532,13 +533,9 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
   <span class="al">Lưu tạm</span>
   </button>
-  <button class="act primary" onclick="chot()" aria-label="Chốt phiếu">
+  <button class="act primary" onclick="chot()" aria-label="Chốt và in phiếu">
     <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-  <span class="al">Chốt</span>
-  </button>
-  <button class="act sec" onclick="showPrint()" aria-label="In phiếu">
-    <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-  <span class="al">In</span>
+  <span class="al">Chốt &amp; In</span>
   </button>
 </div>
 
@@ -598,13 +595,19 @@ table.pv-tbl td.m{padding-right:2px;font-weight:700;color:#0f172a;}
     <div class="pv-page" id="pv-content"></div>
   </div>
   <div class="actions pv-actions" id="pv-actions">
-    <button class="act dr" onclick="delRec()">Xoá</button>
-    <button class="act dr" onclick="editRec()">Sửa tiếp</button>
+    <button class="act dr" onclick="delRec()" aria-label="Xoá bản tạm">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span class="al">Xoá</span>
+    </button>
+    <button class="act dr" onclick="editRec()" aria-label="Sửa tiếp bản tạm">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="al">Sửa tiếp</span>
+    </button>
     <button class="act" onclick="downloadPrint()" aria-label="Tải PDF">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span class="al">Tải PDF</span>
     </button>
     <button class="act primary" onclick="window.print()" aria-label="In ngay">
       <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span class="al">In</span>
     </button>
   </div>
 </div>
@@ -989,11 +992,19 @@ async function chot(){
   const data=buildPayload(true);
   await idbPut(STORE,{...data, id:currentPhieuNo, synced:false});
 
+  afterChot=currentPhieuNo;
+  showPrint({...data, id:currentPhieuNo, synced:false}); // in ngay phiếu vừa chốt (đã có số thật); sync chạy nền
   if(isOnline && SB_URL && SB_KEY){
     await syncOne(data);
   } else {
     showToast(`Đã lưu tạm · Sẽ sync khi có mạng`);
   }
+}
+/* Sau khi đóng màn in của phiếu vừa chốt: đặt lại form (kể cả khi offline, tránh chốt đè lên bản đã chốt) rồi về Trang chủ */
+let afterChot='';
+async function resetForm(){
+  await initPhieu(); items=[]; renderItems();
+  document.getElementById('bien-so').value='';
 }
 
 /* Định dạng biển số: 51b12345 → 51B-123.45; 29ab12345 → 29AB-123.45; 51b1234 → 51B-1234. Không khớp → chỉ viết hoa. */
@@ -1260,15 +1271,9 @@ async function delRec(){
 ══════════════════════════════ */
 let pvNo='';
 function showPrint(rec){
-  let list,bienSo,no,dt;
-  document.getElementById('pv-actions').classList.toggle('draft',!!rec&&recStatus(rec)==='draft');
-  if(rec){list=rec.items;bienSo=rec.bien_so||'---';no=rec.phieu_no||rec.id;dt=fmtD(rec.created_at);}
-  else{
-    if(!items.length){showToast('Chưa có hàng hóa để in','error');return;}
-    const bsEl=document.getElementById('bien-so');
-    bsEl.value=fmtPlate(bsEl.value);
-    list=items;bienSo=bsEl.value.trim()||'---';no=currentPhieuNo;dt=fmtYmd(phieuDate);
-  }
+  if(!rec) return; // chỉ in phiếu đã lưu (có số thật); không in phiếu đang nhập
+  document.getElementById('pv-actions').classList.toggle('draft',recStatus(rec)==='draft');
+  const list=rec.items,bienSo=rec.bien_so||'---',no=rec.phieu_no||rec.id,dt=fmtD(rec.created_at);
   pvNo=no;
   const tongSL=list.reduce((s,it)=>s+it.sl,0);
   const tongTien=list.reduce((s,it)=>s+(it.sl*(1-it.tc/100)*it.gia),0);
@@ -1309,7 +1314,17 @@ function showPrint(rec){
       <div><div class="sk">NV Thu mua</div>(Ký, ghi họ tên)</div>
     </div>`;  document.getElementById('print-view').classList.add('show');
 }
-function hidePrint(){document.getElementById('print-view').classList.remove('show');}
+function hidePrint(){
+  document.getElementById('print-view').classList.remove('show');
+  if(afterChot){
+    const no=afterChot; afterChot='';
+    (async()=>{
+      try{ if(currentPhieuNo===no) await resetForm(); } // sync thành công trước đó có thể đã đặt lại form
+      catch(e){console.error('resetForm',e);showToast('Không đặt lại được phiếu mới: '+(e&&e.message||e),'error');}
+      hideComposer();
+    })();
+  }
+}
 
 async function downloadPrint(){
   // Dùng html2canvas + jsPDF nếu có, fallback về window.print
