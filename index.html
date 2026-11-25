@@ -60,14 +60,17 @@ body{
 }
 
 /* HEADER */
-.hdr{
-  flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 14px;
+/* TOPBAR dùng chung (.hdr / .pv-hdr): 3 ô cố định [72px | tiêu đề giữa | 72px], cao cố định → tên công ty/tiêu đề luôn cùng vị trí, cùng cỡ chữ ở mọi màn */
+.hdr,.pv-hdr{
+  flex-shrink:0;height:52px;
+  display:grid;grid-template-columns:72px 1fr 72px;align-items:center;
+  padding:0 14px;
   box-shadow:0 3px 10px var(--sh-d);z-index:10;
   background:var(--bg);
 }
-.hdr-mid{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.hdr>:first-child,.pv-hdr>:first-child{justify-self:start;}
+.hdr>:last-child,.pv-hdr>:last-child{justify-self:end;}
+.hdr-mid{display:flex;flex-direction:column;align-items:center;justify-self:center;gap:1px;min-width:0;white-space:nowrap;}
 .hdr-mid .co{font-size:var(--fs-xs);font-weight:700;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;}
 .hdr-mid h1{font-size:var(--fs-xl);font-weight:800;}
 .pill{
@@ -345,13 +348,6 @@ body{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
 /* Thanh trên của màn In phiếu: cùng kích thước/vị trí với .hdr của màn chính */
-.pv-hdr{
-  flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 14px;
-  box-shadow:0 3px 10px var(--sh-d);z-index:10;
-  background:var(--bg);
-}
 .pv-hdr-sp{width:34px;height:34px;}
 .pv-body{
   flex:1;min-height:0;overflow-y:auto;
